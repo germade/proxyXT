@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ProxyXT</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main class="app">
+      <header class="app-header">
+        <div>
+          <h1>ProxyXT</h1>
+          <p id="headerSubtitle">Selecciona un servidor</p>
+        </div>
+        <button id="toggleViewButton" type="button" class="plus-button" aria-label="Agregar servidor">
+          +
+        </button>
+      </header>
+
+      <section id="listPanel" class="view-panel">
+        <ul id="serverList" class="server-list"></ul>
+        <div id="emptyState" class="empty-state-card">No hay proxies guardados</div>
+      </section>
+
+      <section id="formPanel" class="view-panel hidden">
+        <form id="proxyForm" class="proxy-form">
+          <input type="hidden" id="serverId" />
+
+          <div class="row">
+            <label>
+              Esquema
+              <select id="scheme">
+                <option value="http">http</option>
+                <option value="https">https</option>
+                <option value="socks4">socks4</option>
+                <option value="socks5">socks5</option>
+              </select>
+            </label>
+
+            <label>
+              Puerto
+              <input id="port" type="number" min="1" max="65535" required />
+            </label>
+          </div>
+
+          <label>
+            Host/IP
+            <input id="host" type="text" required />
+          </label>
+
+          <label>
+            Bypass (coma separado)
+            <input id="bypassList" type="text" placeholder="localhost, *.internal.local" />
+          </label>
+
+          <label>
+            Alias (opcional)
+            <input id="name" type="text" maxlength="80" />
+          </label>
+
+          <div class="actions">
+            <button id="submitButton" type="submit">Guardar servidor</button>
+            <button id="deleteServer" type="button" class="ghost hidden">Eliminar</button>
+          </div>
+        </form>
+      </section>
+
+      <p id="feedback" class="feedback" role="status" aria-live="polite"></p>
+      <footer id="appFooter" class="app-footer">
+        <span id="activeFooter">Activo: Sistema</span>
+        <button
+          id="toggleLogs"
+          type="button"
+          class="ghost footer-btn icon-btn"
+          aria-label="Mostrar logs de backend"
+          title="Logs de backend"
+        >
+          &#128027;
+        </button>
+      </footer>
+      <section id="logsPanel" class="logs-panel hidden">
+        <pre id="logsContent">Sin logs.</pre>
+      </section>
+    </main>
+
+    <script src="popup.js"></script>
+  </body>
+</html>
