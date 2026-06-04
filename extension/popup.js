@@ -49,16 +49,51 @@ function sendMessage(message) {
 }
 
 async function callBackground(type, payload = {}) {
+  const previousState = state;
   const response = await sendMessage({ type, payload });
   if (!response?.ok) {
     throw new Error(response?.error || "Error desconocido");
   }
   if (response.state) {
     state = response.state;
-    render();
+    if (shouldPatchActiveStateOnly(type, previousState, state)) {
+      patchActiveStateInList();
+    } else {
+      render();
+    }
   }
 
   return response;
+}
+
+function shouldPatchActiveStateOnly(type, previousState, nextState) {
+  if (type !== "proxyxt/activateServer") {
+    return false;
+  }
+
+  if (!Array.isArray(previousState?.servers) || !Array.isArray(nextState?.servers)) {
+    return false;
+  }
+
+  if (previousState.servers.length !== nextState.servers.length) {
+    return false;
+  }
+
+  return previousState.servers.every((server, index) => {
+    return server.id === nextState.servers[index]?.id;
+  });
+}
+
+function patchActiveStateInList() {
+  const active = state.servers.find((server) => server.id === state.activeServerId);
+  ui.activeFooter.style.color = "";
+  ui.activeFooter.textContent = `Activo: ${active ? getServerDisplayName(active) : "Sistema"}`;
+
+  const listItems = ui.serverList.querySelectorAll(".server-item");
+  listItems.forEach((item) => {
+    const isActive = item.dataset.serverId === state.activeServerId;
+    item.classList.toggle("is-active", isActive);
+  });
 }
 
 function setFeedback(message, isError = true) {
@@ -247,6 +282,7 @@ function closeFormView() {
 function createServerItem(server) {
   const li = document.createElement("li");
   li.className = "server-item";
+  li.dataset.serverId = server.id;
   if (server.id === state.activeServerId) {
     li.classList.add("is-active");
   }
