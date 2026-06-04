@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from "preact/hooks";
-import { sendMessage } from "../lib/runtime.js";
+import { containsPermissions, requestPermissions, sendMessage } from "../lib/runtime.js";
 import {
   defaultState,
   initialFormState,
@@ -306,6 +306,23 @@ export function useProxyApp() {
 
   async function handleReloadActiveTabChange(enabled) {
     const previous = Boolean(state.preferences?.reloadActiveTabOnToggle);
+
+    if (enabled) {
+      try {
+        const hasTabsPermission = await containsPermissions(["tabs"]);
+        if (!hasTabsPermission) {
+          const granted = await requestPermissions(["tabs"]);
+          if (!granted) {
+            setFeedback({ message: t("messages.tabsPermissionDenied"), isError: true });
+            return;
+          }
+        }
+      } catch (error) {
+        setFeedback({ message: error.message || t("messages.tabsPermissionDenied"), isError: true });
+        return;
+      }
+    }
+
     setState((current) => ({
       ...current,
       preferences: {

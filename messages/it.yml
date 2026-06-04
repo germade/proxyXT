@@ -67,6 +67,7 @@ messages:
   reloadOnToggleDisabled: Ricarica della scheda attiva disattivata
   syncServersEnabled: Sincronizzazione server attivata
   syncServersDisabled: Sincronizzazione server disattivata
+  tabsPermissionDenied: Il permesso tabs e necessario per ricaricare la scheda attiva
   languageChanged: "Lingua: {{language}}"
   languageChangedAuto: "Lingua: Auto ({{language}})"
   logsLoadError: "Impossibile caricare i log: {{error}}"

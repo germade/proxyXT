@@ -67,6 +67,7 @@ messages:
   reloadOnToggleDisabled: Rechargement de l'onglet actif desactive
   syncServersEnabled: Synchronisation des serveurs activee
   syncServersDisabled: Synchronisation des serveurs desactivee
+  tabsPermissionDenied: L'autorisation tabs est necessaire pour recharger l'onglet actif
   languageChanged: "Langue: {{language}}"
   languageChangedAuto: "Langue: Auto ({{language}})"
   logsLoadError: "Impossible de charger les logs: {{error}}"

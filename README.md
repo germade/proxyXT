@@ -58,7 +58,7 @@ npm run build
 
 - `storage`: persistencia local y sincronizacion opcional.
 - `proxy`: aplicacion de configuracion proxy del navegador.
-- `tabs`: recarga opcional de la pestana activa tras activar o desactivar proxy.
+- `tabs` como permiso opcional: se solicita solo si el usuario activa la recarga de la pestana activa.
 
 ## Estructura
 

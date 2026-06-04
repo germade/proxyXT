@@ -67,6 +67,7 @@ messages:
   reloadOnToggleDisabled: Neuladen des aktiven Tabs deaktiviert
   syncServersEnabled: Serversynchronisierung aktiviert
   syncServersDisabled: Serversynchronisierung deaktiviert
+  tabsPermissionDenied: Die Berechtigung tabs ist erforderlich, um den aktiven Tab neu zu laden
   languageChanged: "Sprache: {{language}}"
   languageChangedAuto: "Sprache: Auto ({{language}})"
   logsLoadError: "Logs konnten nicht geladen werden: {{error}}"

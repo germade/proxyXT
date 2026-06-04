@@ -67,6 +67,7 @@ messages:
   reloadOnToggleDisabled: Recarga da aba ativa desativada
   syncServersEnabled: Sincronizacao de servidores ativada
   syncServersDisabled: Sincronizacao de servidores desativada
+  tabsPermissionDenied: A permissao de abas e necessaria para recarregar a aba ativa
   languageChanged: "Idioma: {{language}}"
   languageChangedAuto: "Idioma: Auto ({{language}})"
   logsLoadError: "Nao foi possivel carregar logs: {{error}}"
