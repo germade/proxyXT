@@ -61,6 +61,22 @@ function proxySettingsSet(config) {
   });
 }
 
+function proxySettingsGet(details = { incognito: false }) {
+  if (api.proxy?.settings?.get.length <= 1) {
+    return api.proxy.settings.get(details);
+  }
+
+  return new Promise((resolve, reject) => {
+    api.proxy.settings.get(details, (result) => {
+      if (api.runtime.lastError) {
+        reject(new Error(api.runtime.lastError.message));
+        return;
+      }
+      resolve(result);
+    });
+  });
+}
+
 async function loadState() {
   const result = await storageGet(STORAGE_KEY);
   const state = result?.[STORAGE_KEY];
@@ -108,6 +124,31 @@ function getLogContext(payload) {
   return { ...payload };
 }
 
+function summarizeServer(server) {
+  if (!server) {
+    return null;
+  }
+
+  return {
+    id: server.id,
+    name: server.name || null,
+    scheme: server.scheme,
+    host: server.host,
+    port: server.port,
+    hasBypass: Boolean(String(server.bypassList || "").trim())
+  };
+}
+
+function summarizeProxyValue(value) {
+  const mode = value?.mode || null;
+  const singleProxy = value?.rules?.singleProxy || null;
+  return {
+    mode,
+    singleProxy,
+    bypassCount: Array.isArray(value?.rules?.bypassList) ? value.rules.bypassList.length : 0
+  };
+}
+
 function mapServerToProxyRules(server) {
   const port = Number.parseInt(server.port, 10);
   if (!server.host || Number.isNaN(port)) {
@@ -134,12 +175,33 @@ async function applyActiveProxy(state) {
   const activeServer = state.servers.find((server) => server.id === state.activeServerId);
 
   if (!activeServer) {
+    await addLog("info", "Aplicando modo sistema (sin servidor activo)", {
+      activeServerId: state.activeServerId
+    });
     await proxySettingsSet({ value: { mode: "system" }, scope: "regular" });
+    const current = await proxySettingsGet({ incognito: false });
+    await addLog("debug", "Proxy configurado en navegador", {
+      requestedMode: "system",
+      effectiveMode: current?.value?.mode || null,
+      levelOfControl: current?.levelOfControl || null
+    });
     return;
   }
 
   const value = mapServerToProxyRules(activeServer);
+  await addLog("info", "Aplicando servidor proxy activo", {
+    activeServerId: state.activeServerId,
+    server: summarizeServer(activeServer),
+    proxy: summarizeProxyValue(value)
+  });
   await proxySettingsSet({ value, scope: "regular" });
+  const current = await proxySettingsGet({ incognito: false });
+  await addLog("debug", "Proxy configurado en navegador", {
+    requestedMode: value.mode,
+    effectiveMode: current?.value?.mode || null,
+    effectiveProxy: summarizeProxyValue(current?.value || null),
+    levelOfControl: current?.levelOfControl || null
+  });
 }
 
 function sanitizeServer(rawServer) {
@@ -188,12 +250,18 @@ async function handleSaveServer(payload) {
   }
 
   await saveState(state);
+  await addLog("debug", "Estado actualizado tras guardar servidor", {
+    server: summarizeServer(incoming),
+    totalServers: state.servers.length,
+    activeServerId: state.activeServerId
+  });
   return state;
 }
 
 async function handleDeleteServer(payload) {
   const serverId = payload.serverId;
   const state = await loadState();
+  const deletedServer = state.servers.find((server) => server.id === serverId) || null;
 
   state.servers = state.servers.filter((server) => server.id !== serverId);
   if (state.activeServerId === serverId) {
@@ -202,12 +270,23 @@ async function handleDeleteServer(payload) {
 
   await saveState(state);
   await applyActiveProxy(state);
+  await addLog("debug", "Estado actualizado tras eliminar servidor", {
+    serverId,
+    deletedServer: summarizeServer(deletedServer),
+    totalServers: state.servers.length,
+    activeServerId: state.activeServerId
+  });
   return state;
 }
 
 async function handleActivateServer(payload) {
   const state = await loadState();
   const serverId = payload.serverId;
+
+  await addLog("debug", "Solicitud de cambio de servidor activo", {
+    requestedServerId: serverId,
+    previousActiveServerId: state.activeServerId
+  });
 
   if (serverId === null) {
     state.activeServerId = null;
@@ -221,6 +300,9 @@ async function handleActivateServer(payload) {
 
   await saveState(state);
   await applyActiveProxy(state);
+  await addLog("debug", "Estado actualizado tras activar/desactivar", {
+    activeServerId: state.activeServerId
+  });
   return state;
 }
 
@@ -229,7 +311,13 @@ api.runtime.onInstalled.addListener(async () => {
     const state = await loadState();
     await saveState(state);
     await applyActiveProxy(state);
-    await addLog("info", "Extension instalada", null);
+    await addLog("info", "Extension instalada", {
+      version: api.runtime.getManifest?.().version || null,
+      initialState: {
+        activeServerId: state.activeServerId,
+        totalServers: state.servers.length
+      }
+    });
   } catch (error) {
     await addLog("error", "Fallo al inicializar instalacion", { error: error.message });
   }
@@ -239,7 +327,10 @@ api.runtime.onStartup?.addListener(async () => {
   try {
     const state = await loadState();
     await applyActiveProxy(state);
-    await addLog("info", "Extension iniciada", null);
+    await addLog("info", "Extension iniciada", {
+      activeServerId: state.activeServerId,
+      totalServers: state.servers.length
+    });
   } catch (error) {
     await addLog("error", "Fallo al iniciar extension", { error: error.message });
   }
@@ -249,6 +340,11 @@ api.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   const actionType = message?.type;
 
   const run = async () => {
+    await addLog("debug", "Mensaje recibido en background", {
+      actionType,
+      payload: getLogContext(message?.payload)
+    });
+
     if (actionType === "proxyxt/getState") {
       const state = await handleGetState();
       return { state };

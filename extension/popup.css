@@ -18,6 +18,17 @@ body {
   padding: 14px;
 }
 
+.app.logs-open {
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 10px;
+}
+
+.app.logs-open .app-header,
+.app.logs-open .view-panel {
+  display: none;
+}
+
 .app-header {
   display: flex;
   align-items: flex-start;
@@ -37,12 +48,20 @@ body {
 }
 
 .plus-button {
-  min-width: 64px;
+  width: 34px;
   height: 34px;
-  padding: 0 10px;
-  font-size: 0.86rem;
+  padding: 0;
+  border: 1px solid #9eb4cb;
+  background: #f7fbff;
+  color: #2f4d68;
+  font-size: 1rem;
   line-height: 1.1;
   border-radius: 10px;
+}
+
+.plus-button:hover {
+  background: #eef5ff;
+  filter: none;
 }
 
 .view-panel {
@@ -63,23 +82,35 @@ h2 {
 }
 
 .server-item {
-  padding: 8px;
-  border: 1px solid #d7e2ec;
-  border-radius: 9px;
-  background: #fff;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: stretch;
+  gap: 0;
 }
 
 .server-main {
-  width: 100%;
-  border: none;
-  background: transparent;
+  flex: 1;
+  border: 1px solid #c7d6e4;
+  border-right: none;
+  background: #ffffff;
   color: inherit;
-  padding: 0;
+  padding: 8px;
+  border-radius: 9px 0 0 9px;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
   text-align: left;
+}
+
+.server-main.no-meta {
+  min-height: 48px;
+  justify-content: center;
+}
+
+.server-item.is-active .server-main {
+  border-color: #2f8d4c;
+  background: #f3fbf5;
 }
 
 .server-name {
@@ -92,13 +123,30 @@ h2 {
 .server-meta {
   font-size: 0.82rem;
   color: #53657a;
-  margin-top: 3px;
 }
 
-.server-actions {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 8px;
+.server-edit-btn {
+  min-width: 34px;
+  border: 1px solid #c7d6e4;
+  border-radius: 0 9px 9px 0;
+  background: #ffffff;
+  color: #486178;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 0;
+  display: grid;
+  place-items: center;
+}
+
+.server-edit-btn:hover {
+  background: #eef5ff;
+  filter: none;
+}
+
+.server-item.is-active .server-edit-btn {
+  border-color: #2f8d4c;
+  background: #f3fbf5;
+  color: #2b6f41;
 }
 
 button {
@@ -153,6 +201,10 @@ select {
   margin-top: 8px;
 }
 
+#deleteServer {
+  margin-left: auto;
+}
+
 .empty-state-card {
   border: 1px dashed #a9bfd4;
   background: #f7fbff;
@@ -162,13 +214,6 @@ select {
   text-align: center;
   margin: 4px 0 8px;
   font-size: 0.84rem;
-}
-
-.feedback {
-  min-height: 1.2em;
-  margin: 8px 0 0;
-  font-size: 0.82rem;
-  color: #b03838;
 }
 
 .app-footer {
@@ -214,9 +259,37 @@ select {
   overflow: auto;
 }
 
+.app.logs-open .logs-panel {
+  order: 1;
+  display: flex;
+  flex-direction: column;
+  margin-top: 0;
+  overflow: auto;
+}
+
+.app.logs-open .app-footer {
+  order: 2;
+}
+
+.logs-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px;
+  border-bottom: 1px solid #d8e3ef;
+  background: #f7fbff;
+}
+
+.logs-toolbar strong {
+  font-size: 0.83rem;
+  color: #3b5167;
+}
+
 .logs-panel pre {
   margin: 0;
   padding: 8px;
+  flex: 1;
   font-size: 0.72rem;
   line-height: 1.4;
   color: #2d3c4d;

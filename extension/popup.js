@@ -1,6 +1,7 @@
 const api = globalThis.browser ?? globalThis.chrome;
 
 const ui = {
+  app: document.querySelector(".app"),
   headerSubtitle: document.getElementById("headerSubtitle"),
   toggleViewButton: document.getElementById("toggleViewButton"),
   listPanel: document.getElementById("listPanel"),
@@ -20,8 +21,7 @@ const ui = {
   port: document.getElementById("port"),
   bypassList: document.getElementById("bypassList"),
   submitButton: document.getElementById("submitButton"),
-  deleteServer: document.getElementById("deleteServer"),
-  feedback: document.getElementById("feedback")
+  deleteServer: document.getElementById("deleteServer")
 };
 
 let state = {
@@ -62,8 +62,13 @@ async function callBackground(type, payload = {}) {
 }
 
 function setFeedback(message, isError = true) {
-  ui.feedback.style.color = isError ? "#b03838" : "#206b35";
-  ui.feedback.textContent = message || "";
+  if (!message) {
+    render();
+    return;
+  }
+
+  ui.activeFooter.style.color = isError ? "#b03838" : "#206b35";
+  ui.activeFooter.textContent = message;
 }
 
 function getServerDisplayName(server) {
@@ -86,9 +91,24 @@ function updateHeaderSubtitle() {
 }
 
 function hideLogsPanel() {
+  ui.logsPanel.style.height = "";
+  ui.app.classList.remove("logs-open");
   ui.logsPanel.classList.add("hidden");
   ui.toggleLogs.classList.remove("is-active");
   ui.toggleLogs.setAttribute("aria-label", "Mostrar logs de backend");
+}
+
+function showLogsPanel() {
+  const snapshot = ui.app.offsetHeight;
+  ui.app.classList.add("logs-open");
+  ui.logsPanel.classList.remove("hidden");
+  const appStyle = getComputedStyle(ui.app);
+  const paddingV = parseFloat(appStyle.paddingTop) + parseFloat(appStyle.paddingBottom);
+  const footerStyle = getComputedStyle(ui.appFooter);
+  const footerGap = parseFloat(footerStyle.marginTop);
+  ui.logsPanel.style.height = (snapshot - paddingV - footerGap - ui.appFooter.offsetHeight) + "px";
+  ui.toggleLogs.classList.add("is-active");
+  ui.toggleLogs.setAttribute("aria-label", "Ocultar logs de backend");
 }
 
 function formatLogLine(log) {
@@ -171,21 +191,30 @@ function closeFormView() {
 function createServerItem(server) {
   const li = document.createElement("li");
   li.className = "server-item";
+  if (server.id === state.activeServerId) {
+    li.classList.add("is-active");
+  }
 
   const toggleBtn = document.createElement("button");
   toggleBtn.type = "button";
   toggleBtn.className = "server-main";
 
+  const alias = String(server?.name || "").trim();
+  const endpoint = `${server.scheme}://${server.host}:${server.port}`;
+
   const name = document.createElement("span");
   name.className = "server-name";
-  name.textContent = getServerDisplayName(server);
+  name.textContent = alias || `${server.host}:${server.port}`;
 
-  const badge = document.createElement("span");
-  badge.textContent = server.id === state.activeServerId ? "Activo" : "Inactivo";
-  badge.style.fontSize = "0.75rem";
-  badge.style.color = server.id === state.activeServerId ? "#1f7a3c" : "#607286";
-
-  toggleBtn.append(name, badge);
+  toggleBtn.append(name);
+  if (alias) {
+    const meta = document.createElement("span");
+    meta.className = "server-meta";
+    meta.textContent = endpoint;
+    toggleBtn.append(meta);
+  } else {
+    toggleBtn.classList.add("no-meta");
+  }
   toggleBtn.addEventListener("click", async () => {
     const nextServerId = server.id === state.activeServerId ? null : server.id;
     try {
@@ -200,30 +229,25 @@ function createServerItem(server) {
     }
   });
 
-  const meta = document.createElement("div");
-  meta.className = "server-meta";
-  meta.textContent = `${server.scheme}://${server.host}:${server.port}`;
-
-  const actions = document.createElement("div");
-  actions.className = "server-actions";
-
   const editBtn = document.createElement("button");
   editBtn.type = "button";
-  editBtn.className = "ghost";
-  editBtn.textContent = "Editar";
+  editBtn.className = "server-edit-btn";
+  editBtn.textContent = "✎";
+  editBtn.setAttribute("aria-label", `Editar ${getServerDisplayName(server)}`);
+  editBtn.title = "Editar servidor";
   editBtn.addEventListener("click", () => {
     openFormForEdit(server);
     setFeedback("");
   });
 
-  actions.append(editBtn);
-  li.append(toggleBtn, meta, actions);
+  li.append(toggleBtn, editBtn);
 
   return li;
 }
 
 function render() {
   const active = state.servers.find((server) => server.id === state.activeServerId);
+  ui.activeFooter.style.color = "";
   ui.activeFooter.textContent = `Activo: ${active ? getServerDisplayName(active) : "Sistema"}`;
 
   ui.serverList.innerHTML = "";
@@ -297,9 +321,7 @@ ui.toggleLogs.addEventListener("click", async () => {
 
   try {
     await refreshLogsPanel();
-    ui.logsPanel.classList.remove("hidden");
-    ui.toggleLogs.classList.add("is-active");
-    ui.toggleLogs.setAttribute("aria-label", "Ocultar logs de backend");
+    showLogsPanel();
   } catch (error) {
     setFeedback(`No se pudieron cargar logs: ${error.message}`);
   }
