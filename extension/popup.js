@@ -104,27 +104,72 @@ function showLogsPanel() {
   ui.logsPanel.style.height = h + "px";
   ui.logsPanel.classList.remove("hidden");
   ui.toggleLogs.classList.add("is-active");
+  ui.toggleLogs.classList.remove("has-error");
   ui.toggleLogs.setAttribute("aria-label", "Ocultar logs de backend");
+}
+
+function toYaml(value, indent) {
+  const pad = "  ".repeat(indent);
+  if (value === null || value === undefined) return "null";
+  if (typeof value === "boolean" || typeof value === "number") return String(value);
+  if (typeof value === "string") {
+    const needsQuote =
+      value === "" ||
+      /^[\s'"]|[\n:#\[\]{}|>&*!@%`]|\s$/.test(value) ||
+      value === "true" ||
+      value === "false" ||
+      value === "null" ||
+      !Number.isNaN(Number(value));
+    return needsQuote ? JSON.stringify(value) : value;
+  }
+  if (Array.isArray(value)) {
+    if (!value.length) return "[]";
+    return value.map((item) => {
+      const rendered = toYaml(item, indent + 1);
+      return typeof item === "object" && item !== null
+        ? `${pad}-\n${"  ".repeat(indent + 1)}${rendered.trimStart()}`
+        : `${pad}- ${rendered}`;
+    }).join("\n");
+  }
+  if (typeof value === "object") {
+    const keys = Object.keys(value);
+    if (!keys.length) return "{}";
+    return keys.map((k) => {
+      const v = value[k];
+      if (v !== null && typeof v === "object") {
+        return `${pad}${k}:\n${toYaml(v, indent + 1)}`;
+      }
+      return `${pad}${k}: ${toYaml(v, indent)}`;
+    }).join("\n");
+  }
+  return String(value);
 }
 
 function createLogEntry(log) {
   const level = String(log.level || "info").toUpperCase();
   const message = String(log.message || "Sin mensaje");
-  const context = log.context ? ` | ${JSON.stringify(log.context)}` : "";
 
   const entry = document.createElement("div");
   entry.className = "log-entry";
-
-  const main = document.createElement("span");
-  main.className = "log-main";
-  main.textContent = `${level}: ${message}${context}`;
 
   const time = document.createElement("span");
   time.className = "log-time";
   const raw = log.time ? new Date(log.time) : null;
   time.textContent = raw && !isNaN(raw) ? raw.toLocaleString() : String(log.time || "");
 
+  const main = document.createElement("span");
+  main.className = "log-main";
+  main.textContent = `${level}: ${message}`;
+
   entry.append(time, main);
+
+  if (log.context) {
+    const ctx = document.createElement("pre");
+    ctx.className = "log-context";
+    ctx.textContent = toYaml(log.context, 0);
+    entry.appendChild(ctx);
+  }
+
   return entry;
 }
 
@@ -342,6 +387,11 @@ ui.toggleLogs.addEventListener("click", async () => {
   try {
     await callBackground("proxyxt/getState");
     closeFormView();
+    const logsResponse = await callBackground("proxyxt/getLogs");
+    const logs = Array.isArray(logsResponse.logs) ? logsResponse.logs : [];
+    if (logs.some((log) => log.level === "error")) {
+      ui.toggleLogs.classList.add("has-error");
+    }
   } catch (error) {
     setFeedback(error.message);
   }

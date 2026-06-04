@@ -4,9 +4,21 @@
   "version": "1.0.0",
   "description": "Cliente proxy para Chrome y Firefox con multiples servidores y cambio rapido.",
   "permissions": ["storage", "proxy"],
+  "icons": {
+    "16": "icons/proxyxt-16.png",
+    "32": "icons/proxyxt-32.png",
+    "48": "icons/proxyxt-48.png",
+    "128": "icons/proxyxt-128.png"
+  },
   "action": {
     "default_title": "ProxyXT",
-    "default_popup": "popup.html"
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/proxyxt-16.png",
+      "32": "icons/proxyxt-32.png",
+      "48": "icons/proxyxt-48.png",
+      "128": "icons/proxyxt-128.png"
+    }
   },
   "background": {
     "service_worker": "background.js"

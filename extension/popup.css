@@ -238,6 +238,27 @@ select {
   opacity: 1;
 }
 
+.icon-btn {
+  position: relative;
+}
+
+.icon-btn.has-error::after {
+  content: '!';
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #b03838;
+  color: #fff;
+  border-radius: 50%;
+  width: 13px;
+  height: 13px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  line-height: 13px;
+  text-align: center;
+  pointer-events: none;
+}
+
 .logs-panel {
   display: flex;
   flex-direction: column;
@@ -289,6 +310,20 @@ select {
   font-size: 0.62rem;
   color: #8fa3b8;
   font-family: monospace;
+}
+
+.log-context {
+  margin: 2px 0 0;
+  padding: 4px 6px;
+  background: #f4f8fc;
+  border-left: 2px solid #c7d6e4;
+  border-radius: 0 4px 4px 0;
+  font-size: 0.68rem;
+  line-height: 1.45;
+  color: #3a5068;
+  font-family: monospace;
+  white-space: pre;
+  overflow-x: auto;
 }
 
 .hidden {

@@ -3,6 +3,18 @@ const api = globalThis.browser ?? globalThis.chrome;
 const STORAGE_KEY = "proxyxt-state";
 const LOGS_KEY = "proxyxt-logs";
 const MAX_LOGS = 200;
+const ACTIVE_ICON_PATHS = {
+  16: "icons/proxyxt-16.png",
+  32: "icons/proxyxt-32.png",
+  48: "icons/proxyxt-48.png",
+  128: "icons/proxyxt-128.png"
+};
+const INACTIVE_ICON_PATHS = {
+  16: "icons/proxyxt-16-bw.png",
+  32: "icons/proxyxt-32-bw.png",
+  48: "icons/proxyxt-48-bw.png",
+  128: "icons/proxyxt-128-bw.png"
+};
 
 const defaultState = {
   activeServerId: null,
@@ -149,6 +161,37 @@ function summarizeProxyValue(value) {
   };
 }
 
+async function updateActionIcon(isProxyActive) {
+  const actionApi = api.action ?? api.browserAction;
+  if (!actionApi?.setIcon) {
+    return;
+  }
+
+  const path = isProxyActive ? ACTIVE_ICON_PATHS : INACTIVE_ICON_PATHS;
+
+  try {
+    if (actionApi.setIcon.length <= 1) {
+      await actionApi.setIcon({ path });
+      return;
+    }
+
+    await new Promise((resolve, reject) => {
+      actionApi.setIcon({ path }, () => {
+        if (api.runtime.lastError) {
+          reject(new Error(api.runtime.lastError.message));
+          return;
+        }
+        resolve();
+      });
+    });
+  } catch (error) {
+    await addLog("warn", "No se pudo actualizar icono de la extension", {
+      isProxyActive,
+      error: error instanceof Error ? error.message : String(error)
+    });
+  }
+}
+
 function mapServerToProxyRules(server) {
   const port = Number.parseInt(server.port, 10);
   if (!server.host || Number.isNaN(port)) {
@@ -185,6 +228,7 @@ async function applyActiveProxy(state) {
       effectiveMode: current?.value?.mode || null,
       levelOfControl: current?.levelOfControl || null
     });
+    await updateActionIcon(false);
     return;
   }
 
@@ -202,6 +246,7 @@ async function applyActiveProxy(state) {
     effectiveProxy: summarizeProxyValue(current?.value || null),
     levelOfControl: current?.levelOfControl || null
   });
+  await updateActionIcon(true);
 }
 
 function sanitizeServer(rawServer) {
