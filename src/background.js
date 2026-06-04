@@ -21,7 +21,8 @@ const defaultState = {
   activeServerId: null,
   servers: [],
   preferences: {
-    autoFailoverEnabled: false
+    autoFailoverEnabled: false,
+    language: "auto"
   }
 };
 
@@ -365,10 +366,17 @@ async function handleActivateServer(payload) {
 async function handleUpdatePreferences(payload) {
   const state = await loadState();
   const incoming = payload?.preferences || {};
+  const currentLanguage = String(state.preferences?.language || "auto").toLowerCase();
+  const incomingLanguage = String(incoming.language || currentLanguage).toLowerCase();
+  const language = ["auto", "en", "es", "fr", "pt"].includes(incomingLanguage) ? incomingLanguage : "auto";
 
   state.preferences = {
     ...state.preferences,
-    autoFailoverEnabled: Boolean(incoming.autoFailoverEnabled)
+    autoFailoverEnabled:
+      incoming.autoFailoverEnabled === undefined
+        ? Boolean(state.preferences?.autoFailoverEnabled)
+        : Boolean(incoming.autoFailoverEnabled),
+    language
   };
 
   await saveState(state);

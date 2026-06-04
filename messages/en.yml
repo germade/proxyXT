@@ -1,0 +1,63 @@
+app:
+  title: ProxyXT
+  subtitle:
+    selectServer: Select a server
+    addProxy: Add proxy server
+    editProxy: Edit proxy server
+    preferences: Behavior settings
+
+footer:
+  active: "Active: {{server}}"
+  system: System
+
+buttons:
+  preferences:
+    show: Show preferences
+    hide: Hide preferences
+  logs:
+    show: Show backend logs
+    hide: Hide backend logs
+    title: Backend logs
+  server:
+    save: Save server
+    saveChanges: Save changes
+    delete: Delete
+    add: Add server
+    backToList: Back to list
+    edit: Edit server
+
+labels:
+  scheme: Scheme
+  port: Port
+  host: Host/IP
+  bypassList: Bypass (comma separated)
+  alias: Alias (optional)
+  autoFailover: Automatic failover (round-robin)
+  language: Language
+
+language:
+  auto: Auto
+  en: English
+  es: Spanish
+  fr: French
+  pt: Portuguese
+
+placeholders:
+  bypassList: localhost, *.internal.local
+
+messages:
+  noServers: No saved proxies
+  noLogs: No logs.
+  noMessage: No message
+  unknownError: Unknown error
+  proxyEnabled: "Proxy active: {{server}}"
+  proxyDisabled: Proxy disabled
+  serverSaved: Server saved
+  serverUpdated: Server updated
+  serverDeleted: Server deleted
+  preferencesSaved: Preferences saved
+  logsLoadError: "Could not load logs: {{error}}"
+
+preferences:
+  title: Preferences
+  help: If the active proxy fails, the extension will automatically switch to the next saved server.

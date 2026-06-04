@@ -20,9 +20,16 @@ await build({
   target: "es2020",
   jsxFactory: "h",
   jsxFragment: "Fragment",
+  alias: {
+    react: "preact/compat",
+    "react-dom": "preact/compat",
+    "react-dom/test-utils": "preact/test-utils",
+    "react/jsx-runtime": "preact/jsx-runtime"
+  },
   loader: {
     ".js": "js",
-    ".jsx": "jsx"
+    ".jsx": "jsx",
+    ".yml": "text"
   }
 });
 

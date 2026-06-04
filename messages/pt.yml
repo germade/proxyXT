@@ -1,0 +1,63 @@
+app:
+  title: ProxyXT
+  subtitle:
+    selectServer: Selecione um servidor
+    addProxy: Adicionar servidor proxy
+    editProxy: Editar servidor proxy
+    preferences: Configuracoes de comportamento
+
+footer:
+  active: "Ativo: {{server}}"
+  system: Sistema
+
+buttons:
+  preferences:
+    show: Mostrar preferencias
+    hide: Ocultar preferencias
+  logs:
+    show: Mostrar logs de backend
+    hide: Ocultar logs de backend
+    title: Logs de backend
+  server:
+    save: Salvar servidor
+    saveChanges: Salvar alteracoes
+    delete: Excluir
+    add: Adicionar servidor
+    backToList: Voltar para a lista
+    edit: Editar servidor
+
+labels:
+  scheme: Esquema
+  port: Porta
+  host: Host/IP
+  bypassList: Bypass (separado por virgula)
+  alias: Alias (opcional)
+  autoFailover: Failover automatico (round-robin)
+  language: Idioma
+
+language:
+  auto: Auto
+  en: English
+  es: Espanol
+  fr: Francais
+  pt: Portugues
+
+placeholders:
+  bypassList: localhost, *.internal.local
+
+messages:
+  noServers: Nenhum proxy salvo
+  noLogs: Sem logs.
+  noMessage: Sem mensagem
+  unknownError: Erro desconhecido
+  proxyEnabled: "Proxy ativo: {{server}}"
+  proxyDisabled: Proxy desativado
+  serverSaved: Servidor salvo
+  serverUpdated: Servidor atualizado
+  serverDeleted: Servidor excluido
+  preferencesSaved: Preferencias salvas
+  logsLoadError: "Nao foi possivel carregar logs: {{error}}"
+
+preferences:
+  title: Preferencias
+  help: Se o proxy ativo falhar, a extensao trocara automaticamente para o proximo servidor salvo.

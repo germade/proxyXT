@@ -1,0 +1,63 @@
+app:
+  title: ProxyXT
+  subtitle:
+    selectServer: Selectionnez un serveur
+    addProxy: Ajouter un serveur proxy
+    editProxy: Modifier le serveur proxy
+    preferences: Parametres de comportement
+
+footer:
+  active: "Actif: {{server}}"
+  system: Systeme
+
+buttons:
+  preferences:
+    show: Afficher les preferences
+    hide: Masquer les preferences
+  logs:
+    show: Afficher les logs backend
+    hide: Masquer les logs backend
+    title: Logs backend
+  server:
+    save: Enregistrer le serveur
+    saveChanges: Enregistrer les modifications
+    delete: Supprimer
+    add: Ajouter un serveur
+    backToList: Retour a la liste
+    edit: Modifier le serveur
+
+labels:
+  scheme: Schema
+  port: Port
+  host: Hote/IP
+  bypassList: Bypass (separe par des virgules)
+  alias: Alias (optionnel)
+  autoFailover: Basculement automatique (round-robin)
+  language: Langue
+
+language:
+  auto: Auto
+  en: English
+  es: Espanol
+  fr: Francais
+  pt: Portugues
+
+placeholders:
+  bypassList: localhost, *.internal.local
+
+messages:
+  noServers: Aucun proxy enregistre
+  noLogs: Aucun log.
+  noMessage: Sans message
+  unknownError: Erreur inconnue
+  proxyEnabled: "Proxy actif: {{server}}"
+  proxyDisabled: Proxy desactive
+  serverSaved: Serveur enregistre
+  serverUpdated: Serveur mis a jour
+  serverDeleted: Serveur supprime
+  preferencesSaved: Preferences enregistrees
+  logsLoadError: "Impossible de charger les logs: {{error}}"
+
+preferences:
+  title: Preferences
+  help: Si le proxy actif echoue, l'extension passera automatiquement au serveur suivant enregistre.
