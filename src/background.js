@@ -3,6 +3,7 @@ const api = globalThis.browser ?? globalThis.chrome;
 const STORAGE_KEY = "proxyxt-state";
 const LOGS_KEY = "proxyxt-logs";
 const MAX_LOGS = 200;
+const FAILOVER_COOLDOWN_MS = 5000;
 const ACTIVE_ICON_PATHS = {
   16: "icons/proxyxt-16.png",
   32: "icons/proxyxt-32.png",
@@ -18,8 +19,14 @@ const INACTIVE_ICON_PATHS = {
 
 const defaultState = {
   activeServerId: null,
-  servers: []
+  servers: [],
+  preferences: {
+    autoFailoverEnabled: false
+  }
 };
+
+let failoverInProgress = false;
+let lastFailoverAt = 0;
 
 function generateId() {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
@@ -99,7 +106,11 @@ async function loadState() {
   return {
     ...defaultState,
     ...state,
-    servers: Array.isArray(state.servers) ? state.servers : []
+    servers: Array.isArray(state.servers) ? state.servers : [],
+    preferences: {
+      ...defaultState.preferences,
+      ...(state.preferences || {})
+    }
   };
 }
 
@@ -351,6 +362,81 @@ async function handleActivateServer(payload) {
   return state;
 }
 
+async function handleUpdatePreferences(payload) {
+  const state = await loadState();
+  const incoming = payload?.preferences || {};
+
+  state.preferences = {
+    ...state.preferences,
+    autoFailoverEnabled: Boolean(incoming.autoFailoverEnabled)
+  };
+
+  await saveState(state);
+  await addLog("info", "Preferencias actualizadas", {
+    preferences: state.preferences
+  });
+  return state;
+}
+
+function getNextServerForRoundRobin(state) {
+  if (!state.activeServerId || state.servers.length < 2) {
+    return null;
+  }
+
+  const currentIndex = state.servers.findIndex((server) => server.id === state.activeServerId);
+  if (currentIndex < 0) {
+    return null;
+  }
+
+  return state.servers[(currentIndex + 1) % state.servers.length] || null;
+}
+
+async function maybeFailoverOnProxyError(details) {
+  if (failoverInProgress) {
+    return;
+  }
+
+  const now = Date.now();
+  if (now - lastFailoverAt < FAILOVER_COOLDOWN_MS) {
+    return;
+  }
+
+  failoverInProgress = true;
+  try {
+    const state = await loadState();
+    if (!state.preferences.autoFailoverEnabled) {
+      return;
+    }
+
+    const nextServer = getNextServerForRoundRobin(state);
+    if (!nextServer) {
+      return;
+    }
+
+    const previousServer = state.servers.find((server) => server.id === state.activeServerId) || null;
+    state.activeServerId = nextServer.id;
+    await saveState(state);
+    await applyActiveProxy(state);
+    lastFailoverAt = Date.now();
+
+    await addLog("warn", "Failover round-robin aplicado tras error de proxy", {
+      previousServer: summarizeServer(previousServer),
+      nextServer: summarizeServer(nextServer),
+      proxyError: {
+        error: details?.error || null,
+        fatal: Boolean(details?.fatal),
+        details: details?.details || null
+      }
+    });
+  } catch (error) {
+    await addLog("error", "Fallo al aplicar failover round-robin", {
+      error: error.message
+    });
+  } finally {
+    failoverInProgress = false;
+  }
+}
+
 api.runtime.onInstalled.addListener(async () => {
   try {
     const state = await loadState();
@@ -380,6 +466,13 @@ api.runtime.onStartup?.addListener(async () => {
     await addLog("error", "Fallo al iniciar extension", { error: error.message });
   }
 });
+
+const proxyErrorEvent = api.proxy?.onProxyError;
+if (proxyErrorEvent?.addListener) {
+  proxyErrorEvent.addListener((details) => {
+    maybeFailoverOnProxyError(details);
+  });
+}
 
 api.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   const actionType = message?.type;
@@ -415,6 +508,11 @@ api.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     if (actionType === "proxyxt/activateServer") {
       const state = await handleActivateServer(message.payload || {});
       await addLog("info", "Servidor activado/desactivado", getLogContext(message.payload));
+      return { state };
+    }
+
+    if (actionType === "proxyxt/updatePreferences") {
+      const state = await handleUpdatePreferences(message.payload || {});
       return { state };
     }
 

@@ -61,6 +61,28 @@ body {
   font-size: 0.85rem;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.header-option-btn {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: #ffffff;
+  color: #587090;
+  opacity: 1;
+}
+
+.header-option-btn:hover {
+  background: #f0f4fb;
+}
+
 .plus-button {
   width: 36px;
   height: 36px;
@@ -217,41 +239,8 @@ button.ghost:hover {
   padding: 10px;
 }
 
-label {
-  font-size: 0.76rem;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  text-transform: none;
-  display: grid;
-  gap: 5px;
-  color: #4a5e78;
-}
-
-input,
-select {
-  width: 100%;
-  border: none;
-  border-radius: 6px 6px 3px 3px;
-  padding: 12px 11px 8px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: #243247;
-  background: #edf2f8;
-  box-shadow: inset 0 -2px 0 #9cb2d0;
-  transition: background 120ms ease, box-shadow 120ms ease;
-  appearance: none;
-}
-
-input::placeholder {
-  color: #7e8da3;
-}
-
-input:focus,
-select:focus,
 button:focus-visible {
   outline: none;
-  background: #e9f1ff;
-  box-shadow: inset 0 -3px 0 var(--brand-blue), 0 0 0 1px rgba(0, 83, 255, 0.2);
 }
 
 .row {
@@ -264,6 +253,31 @@ button:focus-visible {
   display: flex;
   gap: 8px;
   margin-top: 8px;
+}
+
+.preferences-card {
+  background: #f4f8ff;
+  border-radius: 12px;
+  padding: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.preferences-card h2 {
+  margin: 0;
+}
+
+.preferences-toggle {
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: #2f3e53;
+}
+
+.preferences-help {
+  margin: 0;
+  font-size: 0.78rem;
+  color: #5f7087;
+  line-height: 1.35;
 }
 
 #deleteServer {
