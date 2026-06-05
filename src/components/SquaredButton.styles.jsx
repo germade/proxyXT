@@ -57,14 +57,14 @@ const plusToggleStyles = css`
   width: 36px;
   height: 36px;
   padding: 0;
-  background: var(--brand-blue);
-  color: #ffffff;
+  background: #d8e6ff;
+  color: #2f4f7d;
   font-size: 1.08rem;
   line-height: 1;
   border-radius: 11px;
 
   &:hover {
-    background: #0967d4;
+    background: #cbdfff;
     filter: none;
   }
 
