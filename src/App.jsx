@@ -10,6 +10,22 @@ import { LogsView } from "./views/logs/LogsView.jsx";
 import { ListView } from "./views/list/ListView.jsx";
 import { FormView } from "./views/form/FormView.jsx";
 import { PreferencesView } from "./views/preferences/PreferencesView.jsx";
+import {
+  ActiveFooter,
+  AppFooter,
+  AppHeader,
+  AppMain,
+  AppTitle,
+  ContentStack,
+  FooterActions,
+  FooterProxyLabel,
+  FooterProxyStatus,
+  FooterProxyValue,
+  HeaderActions,
+  HeaderHome,
+  HeaderSubtitle,
+  LogsLayer
+} from "./App.styles.jsx";
 
 export function App() {
   const mainRef = useRef(null);
@@ -53,13 +69,14 @@ export function App() {
 
   return (
     <Fragment>
-      <div className={`content-stack${view === "logs" ? " is-logs" : ""}`} style={stackedStyle}>
-        <LogsView t={t} logs={logs} />
+      <ContentStack style={stackedStyle}>
+        <LogsLayer $isVisible={view === "logs"}>
+          <LogsView t={t} logs={logs} />
+        </LogsLayer>
 
-        <main ref={mainRef} className="app">
-          <header className="app-header">
-            <div
-              className="app-header-home"
+        <AppMain ref={mainRef} className="app-main" $isHidden={view === "logs"}>
+          <AppHeader>
+            <HeaderHome
               role="button"
               tabIndex={0}
               onClick={handleOpenList}
@@ -70,10 +87,10 @@ export function App() {
                 }
               }}
             >
-              <h1>{t("app.title")}</h1>
-              <p id="headerSubtitle">{subtitle}</p>
-            </div>
-            <div className="header-actions">
+              <AppTitle>{t("app.title")}</AppTitle>
+              <HeaderSubtitle id="headerSubtitle">{subtitle}</HeaderSubtitle>
+            </HeaderHome>
+            <HeaderActions>
               <AddBackButton
                 variant="icon"
                 slot="header"
@@ -91,8 +108,8 @@ export function App() {
                 onClick={handlePrimaryAction}
                 ariaLabel={view === "form" ? t("buttons.server.backToList") : t("buttons.server.add")}
               />
-            </div>
-          </header>
+            </HeaderActions>
+          </AppHeader>
 
           <ListView
             t={t}
@@ -126,24 +143,24 @@ export function App() {
             onSyncServersWithAccountChange={handleSyncServersWithAccountChange}
             onLanguageChange={handleLanguageChange}
           />
-        </main>
-      </div>
+        </AppMain>
+      </ContentStack>
 
-      <footer className={`app-footer${view === "form" ? " hidden" : ""}`}>
+      <AppFooter $isHidden={view === "form"}>
         <div>
         {footerFeedbackMessage ? (
-          <span id="activeFooter" style={footerFeedbackStyle}>
+          <ActiveFooter id="activeFooter" style={footerFeedbackStyle}>
             {footerFeedbackMessage}
-          </span>
+          </ActiveFooter>
         ) : (
-          <span id="activeFooter" className="footer-proxy-status" onClick={handleOpenList}>
-            <span className="footer-proxy-label">{t("footer.proxyLabel")}</span>
-            <span className={`footer-proxy-value${activeServerId ? " is-active" : ""}`}> {activeProxyDisplay}</span>
-          </span>
+          <FooterProxyStatus id="activeFooter" onClick={handleOpenList}>
+            <FooterProxyLabel>{t("footer.proxyLabel")}</FooterProxyLabel>
+            <FooterProxyValue $isActive={Boolean(activeServerId)}> {activeProxyDisplay}</FooterProxyValue>
+          </FooterProxyStatus>
         )}
         </div>
 
-        <div className="footer-actions">
+        <FooterActions>
           <LanguageBadge
             preference={languagePreference}
             effectiveLanguage={effectiveLanguage}
@@ -165,8 +182,8 @@ export function App() {
           >
             <LogsSvg />
           </AddBackButton>
-        </div>
-      </footer>
+        </FooterActions>
+      </AppFooter>
     </Fragment>
   );
 }

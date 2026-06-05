@@ -1,4 +1,14 @@
 import { h } from "preact";
+import {
+  LogContext,
+  LogEntryContainer,
+  LogMain,
+  LogsContent,
+  LogsPanel,
+  LogsToolbar,
+  LogTime,
+  ToolbarTitle
+} from "./LogsView.styles.jsx";
 
 function toYaml(value, indent = 0) {
   const pad = "  ".repeat(indent);
@@ -48,25 +58,25 @@ function LogEntry({ log, t }) {
   const time = rawTime && !Number.isNaN(rawTime.getTime()) ? rawTime.toLocaleString() : String(log.time || "");
 
   return (
-    <div className="log-entry">
-      <span className="log-time">{time}</span>
-      <span className="log-main">{`${level}: ${message}`}</span>
-      {log.context ? <pre className="log-context">{toYaml(log.context, 0)}</pre> : null}
-    </div>
+    <LogEntryContainer>
+      <LogTime>{time}</LogTime>
+      <LogMain>{`${level}: ${message}`}</LogMain>
+      {log.context ? <LogContext>{toYaml(log.context, 0)}</LogContext> : null}
+    </LogEntryContainer>
   );
 }
 
 export function LogsView({ t, logs }) {
   return (
-    <section className="logs-panel">
-      <div className="logs-toolbar">
-        <strong>{t("buttons.logs.title")}</strong>
-      </div>
-      <div className="logs-content">
+    <LogsPanel>
+      <LogsToolbar>
+        <ToolbarTitle>{t("buttons.logs.title")}</ToolbarTitle>
+      </LogsToolbar>
+      <LogsContent>
         {logs.length
           ? logs.map((log, index) => <LogEntry key={`${log.time || index}-${index}`} log={log} t={t} />)
           : t("messages.noLogs")}
-      </div>
-    </section>
+      </LogsContent>
+    </LogsPanel>
   );
 }

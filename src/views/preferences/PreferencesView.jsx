@@ -1,6 +1,13 @@
 import { h } from "preact";
 import { SelectField } from "../../components/form/SelectField.jsx";
-import { CheckboxField } from "../../components/form/CheckboxField.jsx";
+import {
+  PreferenceToggle,
+  PreferencesCard,
+  PreferencesGroup,
+  PreferencesHelp,
+  PreferencesPanel,
+  PreferencesSeparator
+} from "./PreferencesView.styles.jsx";
 
 function languageOptionLabel(language, t) {
   if (language === "auto") return `🌐 ${t("language.auto")}`;
@@ -26,9 +33,9 @@ export function PreferencesView({
   onLanguageChange
 }) {
   return (
-    <section className={`view-panel${view === "preferences" ? "" : " hidden"}`}>
-      <div className="preferences-card">
-        <div className="preferences-group">
+    <PreferencesPanel $isVisible={view === "preferences"}>
+      <PreferencesCard>
+        <PreferencesGroup>
           <SelectField
             id="language"
             label={t("labels.language")}
@@ -44,39 +51,36 @@ export function PreferencesView({
               { value: "de", label: languageOptionLabel("de", t) }
             ]}
           />
-        </div>
+        </PreferencesGroup>
 
-        <div className="preferences-separator" aria-hidden="true" />
+        <PreferencesSeparator aria-hidden="true" />
 
-        <div className="preferences-group">
-          <CheckboxField
+        <PreferencesGroup>
+          <PreferenceToggle
             id="autoFailoverEnabled"
-            className="preferences-toggle"
             checked={Boolean(autoFailoverEnabled)}
             onChange={onAutoFailoverChange}
             label={t("labels.autoFailover")}
           />
-          <p className="preferences-help">{t("preferences.help")}</p>
+          <PreferencesHelp>{t("preferences.help")}</PreferencesHelp>
 
-          <CheckboxField
+          <PreferenceToggle
             id="reloadActiveTabOnToggle"
-            className="preferences-toggle"
             checked={Boolean(reloadActiveTabOnToggle)}
             onChange={onReloadActiveTabChange}
             label={t("labels.reloadActiveTabOnToggle")}
           />
-          <p className="preferences-help">{t("preferences.reloadHelp")}</p>
+          <PreferencesHelp>{t("preferences.reloadHelp")}</PreferencesHelp>
 
-          <CheckboxField
+          <PreferenceToggle
             id="syncServersWithAccount"
-            className="preferences-toggle"
             checked={Boolean(syncServersWithAccount)}
             onChange={onSyncServersWithAccountChange}
             label={t("labels.syncServersWithAccount")}
           />
-          <p className="preferences-help">{t("preferences.syncHelp")}</p>
-        </div>
-      </div>
-    </section>
+          <PreferencesHelp>{t("preferences.syncHelp")}</PreferencesHelp>
+        </PreferencesGroup>
+      </PreferencesCard>
+    </PreferencesPanel>
   );
 }

@@ -1,6 +1,14 @@
 import { h } from "preact";
 import { InputField } from "../../components/form/InputField.jsx";
 import { SelectField } from "../../components/form/SelectField.jsx";
+import {
+  Actions,
+  DeleteButton,
+  FormPanel,
+  FormRow,
+  ProxyForm,
+  SubmitButton
+} from "./FormView.styles.jsx";
 
 export function FormView({
   t,
@@ -12,9 +20,9 @@ export function FormView({
   onDelete
 }) {
   return (
-    <section className={`view-panel${view === "form" ? "" : " hidden"}`}>
-      <form className="proxy-form" onSubmit={onSubmit}>
-        <div className="row">
+    <FormPanel $isVisible={view === "form"}>
+      <ProxyForm onSubmit={onSubmit}>
+        <FormRow>
           <SelectField
             label={t("labels.scheme")}
             id="scheme"
@@ -37,7 +45,7 @@ export function FormView({
             required={true}
             onInput={(value) => setFormData((current) => ({ ...current, port: value }))}
           />
-        </div>
+        </FormRow>
 
         <InputField
           label={t("labels.host")}
@@ -66,18 +74,17 @@ export function FormView({
           onInput={(value) => setFormData((current) => ({ ...current, name: value }))}
         />
 
-        <div className="actions">
-          <button type="submit" className="btn">{formMode === "edit" ? t("buttons.server.saveChanges") : t("buttons.server.save")}</button>
-          <button
-            id="deleteServer"
+        <Actions>
+          <SubmitButton type="submit">{formMode === "edit" ? t("buttons.server.saveChanges") : t("buttons.server.save")}</SubmitButton>
+          <DeleteButton
             type="button"
-            className={`btn ghost${formData.id ? "" : " hidden"}`}
+            $isVisible={Boolean(formData.id)}
             onClick={onDelete}
           >
             {t("buttons.server.delete")}
-          </button>
-        </div>
-      </form>
-    </section>
+          </DeleteButton>
+        </Actions>
+      </ProxyForm>
+    </FormPanel>
   );
 }

@@ -1,36 +1,48 @@
 import { h } from "preact";
+import {
+  EmptyStateCard,
+  ListContainer,
+  ListPanel,
+  ServerEditButton,
+  ServerListItem,
+  ServerList,
+  ServerMainButton,
+  ServerMeta,
+  ServerName
+} from "./ListView.styles.jsx";
 
-function ServerItem({ server, activeServerId, onToggle, onEdit, getServerDisplayName, t }) {
+function ServerRow({ server, activeServerId, onToggle, onEdit, getServerDisplayName, t }) {
   const alias = String(server?.name || "").trim();
   const endpoint = `${server.scheme}://${server.host}:${server.port}`;
   const isActive = server.id === activeServerId;
+  const hasMeta = Boolean(alias);
 
   return (
-    <li className={`server-item${isActive ? " is-active" : ""}`}>
-      <button type="button" className={`btn server-main${alias ? "" : " no-meta"}`} onClick={() => onToggle(server)}>
-        <span className="server-name">{alias || `${server.host}:${server.port}`}</span>
-        {alias ? <span className="server-meta">{endpoint}</span> : null}
-      </button>
-      <button
+    <ServerListItem>
+      <ServerMainButton type="button" $isActive={isActive} $noMeta={!hasMeta} onClick={() => onToggle(server)}>
+        <ServerName $isActive={isActive}>{alias || `${server.host}:${server.port}`}</ServerName>
+        {hasMeta ? <ServerMeta $isActive={isActive}>{endpoint}</ServerMeta> : null}
+      </ServerMainButton>
+      <ServerEditButton
         type="button"
-        className="btn server-edit-btn"
+        $isActive={isActive}
         title={t("buttons.server.edit")}
         aria-label={`${t("buttons.server.edit")} ${getServerDisplayName(server)}`}
         onClick={() => onEdit(server)}
       >
         ✎
-      </button>
-    </li>
+      </ServerEditButton>
+    </ServerListItem>
   );
 }
 
 export function ListView({ t, view, servers, activeServerId, onToggle, onEdit, getServerDisplayName }) {
   return (
-    <section className={`view-panel${view === "list" ? "" : " hidden"}`}>
-      <div className="list-container">
-        <ul className="server-list">
+    <ListPanel $isVisible={view === "list"}>
+      <ListContainer>
+        <ServerList>
             {servers.map((server) => (
-            <ServerItem
+            <ServerRow
                 key={server.id}
                 server={server}
                 activeServerId={activeServerId}
@@ -40,9 +52,9 @@ export function ListView({ t, view, servers, activeServerId, onToggle, onEdit, g
                 t={t}
             />
             ))}
-        </ul>
-        <div className={`empty-state-card${servers.length ? " hidden" : ""}`}>{t("messages.noServers")}</div>
-      </div>
-    </section>
+        </ServerList>
+        <EmptyStateCard $isVisible={!servers.length}>{t("messages.noServers")}</EmptyStateCard>
+      </ListContainer>
+    </ListPanel>
   );
 }
