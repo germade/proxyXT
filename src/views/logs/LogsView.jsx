@@ -36,6 +36,7 @@ import {
 } from "./LogsView.styles.jsx";
 
 const LOG_LEVELS = ["success", "info", "warning", "error", "debug"];
+const FEEDBACK_QUICK_DURATION_MS = 500;
 
 function toYaml(value, indent = 0) {
   const pad = "  ".repeat(indent);
@@ -233,7 +234,7 @@ export function LogsView({ t, logs, onClose, onClearLogs, onFeedback }) {
 
   function handleOpenClearConfirm() {
     if (!orderedLogs.length) {
-      onFeedback?.(noLogsLabel, false, 500);
+      onFeedback?.(noLogsLabel, false, FEEDBACK_QUICK_DURATION_MS);
       return;
     }
     if (closeConfirmTimerRef.current) {
