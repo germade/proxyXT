@@ -281,6 +281,9 @@ export function useProxyApp() {
 
     try {
       await callBackground("proxyxt/reorderServers", { serverIds: nextServers.map((server) => server.id) });
+      if (Boolean(state.preferences?.syncServersWithAccount)) {
+        setFeedback({ message: t("messages.serverOrderSynced"), isError: false });
+      }
     } catch (error) {
       setState((current) => ({
         ...current,

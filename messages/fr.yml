@@ -67,6 +67,7 @@ messages:
   proxyDisabled: Proxy desactive
   serverSaved: Serveur enregistre
   serverUpdated: Serveur mis a jour
+  serverOrderSynced: Ordre des serveurs enregistre et synchronise
   serverDeleted: Serveur supprime
   preferencesSaved: Preferences enregistrees
   roundRobinEnabled: Round Robin active

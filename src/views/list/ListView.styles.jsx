@@ -32,6 +32,7 @@ export const ServerRowContainer = styled.li`
   position: relative;
   min-height: 48px;
   list-style: none;
+  transition: transform 120ms ease;
 
   ${({ $isDropTarget }) =>
     $isDropTarget &&

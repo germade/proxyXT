@@ -67,6 +67,7 @@ messages:
   proxyDisabled: Proxy deaktiviert
   serverSaved: Server gespeichert
   serverUpdated: Server aktualisiert
+  serverOrderSynced: Serverreihenfolge gespeichert und synchronisiert
   serverDeleted: Server geloescht
   preferencesSaved: Einstellungen gespeichert
   roundRobinEnabled: Round Robin aktiviert
