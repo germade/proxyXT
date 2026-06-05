@@ -5,6 +5,7 @@ import { CopySymbolSvg } from "../../components/icons/CopySymbolSvg.jsx";
 import { CrossSymbolSvg } from "../../components/icons/CrossSymbolSvg.jsx";
 import { FilterSymbolSvg } from "../../components/icons/FilterSymbolSvg.jsx";
 import { LogsSvg } from "../../components/icons/LogsSvg.jsx";
+import { SadFaceSvg } from "../../components/icons/SadFaceSvg.jsx";
 import { NewWindowSvg } from "../../components/icons/NewWindowSvg.jsx";
 import {
   CopyLogsButton,
@@ -16,10 +17,7 @@ import {
   ConfirmOverlay,
   ConfirmText,
   EmptyLogsIllustration,
-  EmptyLogsSadFace,
-  EmptyLogsSadEyeLeft,
-  EmptyLogsSadEyeRight,
-  EmptyLogsSadNose,
+  EmptyLogsSadFaceMotion,
   EmptyLogsState,
   FilterCheckbox,
   FilterLabel,
@@ -41,6 +39,7 @@ import {
 
 const LOG_LEVELS = ["success", "info", "warning", "error", "debug"];
 const FEEDBACK_QUICK_DURATION_MS = 500;
+const SAD_EASTER_EGG_DURATION_MS = 4000;
 
 function toYaml(value, indent = 0) {
   const pad = "  ".repeat(indent);
@@ -117,6 +116,7 @@ export function LogsView({ t, logs, onClose, onClearLogs, onFeedback }) {
   const [isSadEasterEggActive, setIsSadEasterEggActive] = useState(false);
     const closeConfirmTimerRef = useRef(null);
   const sadEasterEggTimerRef = useRef(null);
+  const confirmButtonRef = useRef(null);
 
     useEffect(() => {
       return () => {
@@ -130,6 +130,41 @@ export function LogsView({ t, logs, onClose, onClearLogs, onFeedback }) {
         }
       };
     }, []);
+
+  useEffect(() => {
+    if (!isConfirmOpen) {
+      return undefined;
+    }
+
+    const focusTimer = globalThis.setTimeout(() => {
+      confirmButtonRef.current?.focus?.();
+    }, 0);
+
+    return () => {
+      globalThis.clearTimeout(focusTimer);
+    };
+  }, [isConfirmOpen]);
+
+  useEffect(() => {
+    if (!isConfirmOpen) {
+      return undefined;
+    }
+
+    function handleEscapeKey(event) {
+      if (event.key !== "Escape") {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+      handleDismissClearConfirm();
+    }
+
+    globalThis.addEventListener("keydown", handleEscapeKey, true);
+    return () => {
+      globalThis.removeEventListener("keydown", handleEscapeKey, true);
+    };
+  }, [isConfirmOpen]);
   const [levelFilters, setLevelFilters] = useState({
     success: true,
     info: true,
@@ -303,7 +338,7 @@ export function LogsView({ t, logs, onClose, onClearLogs, onFeedback }) {
     sadEasterEggTimerRef.current = globalThis.setTimeout(() => {
       setIsSadEasterEggActive(false);
       sadEasterEggTimerRef.current = null;
-    }, 3000);
+    }, SAD_EASTER_EGG_DURATION_MS);
 
     setIsSadEasterEggActive(true);
     return undefined;
@@ -379,11 +414,9 @@ export function LogsView({ t, logs, onClose, onClearLogs, onFeedback }) {
                 $shouldShake={emptyStateShakeNonce > 0}
               >
                 {isSadEasterEggActive ? (
-                  <EmptyLogsSadFace>
-                    <EmptyLogsSadEyeLeft />
-                    <EmptyLogsSadEyeRight />
-                    <EmptyLogsSadNose />
-                  </EmptyLogsSadFace>
+                  <EmptyLogsSadFaceMotion>
+                    <SadFaceSvg size={56} color="currentColor" />
+                  </EmptyLogsSadFaceMotion>
                 ) : (
                   <LogsSvg size={40} color="currentColor" />
                 )}
@@ -402,7 +435,7 @@ export function LogsView({ t, logs, onClose, onClearLogs, onFeedback }) {
         >
           <ConfirmCard onClick={(event) => event.stopPropagation()}>
             <ConfirmText>{clearConfirmText}</ConfirmText>
-            <ConfirmDangerButton type="button" onClick={handleConfirmClearLogs}>
+            <ConfirmDangerButton ref={confirmButtonRef} type="button" onClick={handleConfirmClearLogs}>
               {confirmClearLabel}
             </ConfirmDangerButton>
             <ConfirmDismissButton type="button" onClick={handleDismissClearConfirm}>

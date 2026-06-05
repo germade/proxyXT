@@ -49,6 +49,15 @@ const sadFaceDrop = keyframes`
   }
 `;
 
+const sadFaceDriftDown = keyframes`
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(12px);
+  }
+`;
+
 export const LogsPanel = styled.section`
   display: flex;
   flex-direction: column;
@@ -243,6 +252,13 @@ export const EmptyLogsIllustration = styled.div`
       : "none"};
 `;
 
+export const EmptyLogsSadFaceMotion = styled.div`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  animation: ${sadFaceDriftDown} 4s ease-out forwards;
+`;
+
 export const EmptyLogsSadFace = styled.div`
   position: relative;
   width: 52px;
@@ -251,9 +267,9 @@ export const EmptyLogsSadFace = styled.div`
 
 export const EmptyLogsSadEye = styled.span`
   position: absolute;
-  top: 13px;
-  width: 7px;
-  height: 7px;
+  top: 18px;
+  width: 14px;
+  height: 4px;
   border-radius: 999px;
   background: currentColor;
   animation: ${sadFaceDrop} 3s ease-out forwards;
@@ -267,14 +283,15 @@ export const EmptyLogsSadEyeRight = styled(EmptyLogsSadEye)`
   right: 12px;
 `;
 
-export const EmptyLogsSadNose = styled.span`
+export const EmptyLogsSadMouth = styled.span`
   position: absolute;
   left: 50%;
-  top: 21px;
-  width: 7px;
-  height: 14px;
-  border-radius: 999px;
-  background: currentColor;
+  top: 30px;
+  width: 22px;
+  height: 12px;
+  border-bottom: 3px solid currentColor;
+  border-radius: 0 0 22px 22px;
+  background: transparent;
   transform: translateX(-50%);
   animation: ${sadFaceDrop} 3s ease-out forwards;
 `;
