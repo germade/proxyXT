@@ -1,8 +1,15 @@
 import { h } from "preact";
+import { useMemo, useState } from "preact/hooks";
 import { CrossSymbolSvg } from "../../components/icons/CrossSymbolSvg.jsx";
+import { FilterSymbolSvg } from "../../components/icons/FilterSymbolSvg.jsx";
 import { NewWindowSvg } from "../../components/icons/NewWindowSvg.jsx";
 import {
   CloseWindowButton,
+  FilterCheckbox,
+  FilterLabel,
+  FilterMenu,
+  FilterMenuPanel,
+  FilterToggleButton,
   LogContext,
   LogEntryContainer,
   LogMain,
@@ -14,6 +21,8 @@ import {
   ToolbarActions,
   ToolbarTitle
 } from "./LogsView.styles.jsx";
+
+const LOG_LEVELS = ["success", "info", "warning", "error", "debug"];
 
 function toYaml(value, indent = 0) {
   const pad = "  ".repeat(indent);
@@ -73,6 +82,14 @@ function LogEntry({ log, t }) {
 }
 
 export function LogsView({ t, logs, onClose }) {
+  const [levelFilters, setLevelFilters] = useState({
+    success: true,
+    info: true,
+    warning: true,
+    error: true,
+    debug: true
+  });
+
   function handleOpenInNewWindow() {
     const api = globalThis.browser ?? globalThis.chrome;
     const logsUrl = api?.runtime?.getURL ? api.runtime.getURL("logs.html") : "logs.html";
@@ -81,6 +98,7 @@ export function LogsView({ t, logs, onClose }) {
 
   const openInWindowLabel = t("buttons.logs.openInWindow");
   const closeWindowLabel = t("buttons.logs.closeWindow");
+  const filtersLabel = t("buttons.logs.filters");
 
   function handleCloseWindow() {
     if (typeof onClose === "function") {
@@ -90,11 +108,45 @@ export function LogsView({ t, logs, onClose }) {
     globalThis.close();
   }
 
+  function toggleLevelFilter(level, checked) {
+    setLevelFilters((current) => ({
+      ...current,
+      [level]: checked
+    }));
+  }
+
+  const filteredLogs = useMemo(() => {
+    return logs.filter((log) => {
+      const normalizedLevel = String(log.level || "info").toLowerCase();
+      if (Object.prototype.hasOwnProperty.call(levelFilters, normalizedLevel)) {
+        return Boolean(levelFilters[normalizedLevel]);
+      }
+      return Boolean(levelFilters.info);
+    });
+  }, [logs, levelFilters]);
+
   return (
     <LogsPanel>
       <LogsToolbar>
         <ToolbarTitle>{t("buttons.logs.title")}</ToolbarTitle>
         <ToolbarActions>
+          <FilterMenu>
+            <FilterToggleButton title={filtersLabel} aria-label={filtersLabel}>
+              <FilterSymbolSvg size={16} />
+            </FilterToggleButton>
+            <FilterMenuPanel>
+              {LOG_LEVELS.map((level) => (
+                <FilterLabel key={level}>
+                  <FilterCheckbox
+                    type="checkbox"
+                    checked={Boolean(levelFilters[level])}
+                    onChange={(event) => toggleLevelFilter(level, event.currentTarget.checked)}
+                  />
+                  {level.toUpperCase()}
+                </FilterLabel>
+              ))}
+            </FilterMenuPanel>
+          </FilterMenu>
           <OpenWindowButton
             type="button"
             onClick={handleOpenInNewWindow}
@@ -114,8 +166,8 @@ export function LogsView({ t, logs, onClose }) {
         </ToolbarActions>
       </LogsToolbar>
       <LogsContent>
-        {logs.length
-          ? logs.map((log, index) => <LogEntry key={`${log.time || index}-${index}`} log={log} t={t} />)
+        {filteredLogs.length
+          ? filteredLogs.map((log, index) => <LogEntry key={`${log.time || index}-${index}`} log={log} t={t} />)
           : t("messages.noLogs")}
       </LogsContent>
     </LogsPanel>

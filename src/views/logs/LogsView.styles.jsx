@@ -41,6 +41,77 @@ export const ToolbarActions = styled.div`
   gap: 6px;
 `;
 
+export const FilterMenu = styled.details`
+  position: relative;
+
+  &[open] > summary {
+    background: #d4e5ff;
+    color: #203c5c;
+  }
+`;
+
+export const FilterToggleButton = styled.summary`
+  list-style: none;
+  border: none;
+  background: transparent;
+  color: #355170;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
+
+  &::-webkit-details-marker {
+    display: none;
+  }
+
+  &:hover {
+    background: #d4e5ff;
+    color: #203c5c;
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 83, 255, 0.2);
+  }
+`;
+
+export const FilterMenuPanel = styled.div`
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 3;
+  width: 138px;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #bfd7ff;
+  background: #f4f8ff;
+  box-shadow: 0 12px 24px rgba(25, 56, 95, 0.18);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+`;
+
+export const FilterLabel = styled.label`
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.68rem;
+  color: #30445f;
+  font-family: "SF Mono", "Consolas", monospace;
+`;
+
+export const FilterCheckbox = styled.input`
+  margin: 0;
+  width: 14px;
+  height: 14px;
+  accent-color: #2b5ea5;
+`;
+
 export const OpenWindowButton = styled.button`
   border: none;
   background: transparent;

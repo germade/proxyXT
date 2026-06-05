@@ -19,6 +19,7 @@ buttons:
     show: Mostrar logs de backend
     hide: Ocultar logs de backend
     title: Logs de backend
+    filters: Filtros
     openInWindow: Abrir em nova janela
     closeWindow: Fechar janela
   server:
