@@ -37,6 +37,7 @@ labels:
   bypassList: Bypass (separe par des virgules)
   alias: Alias (optionnel)
   autoFailover: Basculement automatique (round-robin)
+  reloadActiveTabOnToggle: Recharger l'onglet actif lors de l'activation/desactivation d'un serveur
   syncServersWithAccount: Synchroniser les serveurs avec le compte du navigateur
   language: Langue
 
@@ -65,8 +66,11 @@ messages:
   preferencesSaved: Preferences enregistrees
   roundRobinEnabled: Round Robin active
   roundRobinDisabled: Round Robin desactive
+  reloadOnToggleEnabled: Rechargement de l'onglet actif active
+  reloadOnToggleDisabled: Rechargement de l'onglet actif desactive
   syncServersEnabled: Synchronisation des serveurs activee
   syncServersDisabled: Synchronisation des serveurs desactivee
+  tabsPermissionDenied: L'autorisation tabs est necessaire pour recharger l'onglet actif
   languageChanged: "Langue: {{language}}"
   languageChangedAuto: "Langue: Auto ({{language}})"
   logsLoadError: "Impossible de charger les logs: {{error}}"
@@ -74,4 +78,5 @@ messages:
 preferences:
   title: Preferences
   help: Si le proxy actif echoue, l'extension passera automatiquement au serveur suivant enregistre.
+  reloadHelp: Recharge l'onglet actuel chaque fois que le proxy actif est active ou desactive.
   syncHelp: Enregistre vos serveurs dans le compte du navigateur pour les retrouver sur vos autres navigateurs connectes.

@@ -37,6 +37,7 @@ labels:
   bypassList: Bypass (durch Komma getrennt)
   alias: Alias (optional)
   autoFailover: Automatischer Failover (round-robin)
+  reloadActiveTabOnToggle: Aktiven Tab beim Aktivieren/Deaktivieren eines Servers neu laden
   syncServersWithAccount: Server mit dem Browserkonto synchronisieren
   language: Sprache
 
@@ -65,8 +66,11 @@ messages:
   preferencesSaved: Einstellungen gespeichert
   roundRobinEnabled: Round Robin aktiviert
   roundRobinDisabled: Round Robin deaktiviert
+  reloadOnToggleEnabled: Neuladen des aktiven Tabs aktiviert
+  reloadOnToggleDisabled: Neuladen des aktiven Tabs deaktiviert
   syncServersEnabled: Serversynchronisierung aktiviert
   syncServersDisabled: Serversynchronisierung deaktiviert
+  tabsPermissionDenied: Die Berechtigung tabs ist erforderlich, um den aktiven Tab neu zu laden
   languageChanged: "Sprache: {{language}}"
   languageChangedAuto: "Sprache: Auto ({{language}})"
   logsLoadError: "Logs konnten nicht geladen werden: {{error}}"
@@ -74,4 +78,5 @@ messages:
 preferences:
   title: Einstellungen
   help: Wenn der aktive Proxy ausfaellt, wechselt die Erweiterung automatisch zum naechsten gespeicherten Server.
+  reloadHelp: Laedt den aktuellen Tab neu, wenn der aktive Proxy aktiviert oder deaktiviert wird.
   syncHelp: Speichert Ihre Server im Browserkonto, damit sie auch in anderen angemeldeten Browsern verfuegbar sind.

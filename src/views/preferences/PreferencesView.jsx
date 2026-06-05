@@ -24,9 +24,11 @@ export function PreferencesView({
   t,
   view,
   autoFailoverEnabled,
+  reloadActiveTabOnToggle,
   syncServersWithAccount,
   language,
   onAutoFailoverChange,
+  onReloadActiveTabChange,
   onSyncServersWithAccountChange,
   onLanguageChange
 }) {
@@ -61,6 +63,14 @@ export function PreferencesView({
             label={t("labels.autoFailover")}
           />
           <PreferencesHelp>{t("preferences.help")}</PreferencesHelp>
+
+          <PreferenceToggle
+            id="reloadActiveTabOnToggle"
+            checked={Boolean(reloadActiveTabOnToggle)}
+            onChange={onReloadActiveTabChange}
+            label={t("labels.reloadActiveTabOnToggle")}
+          />
+          <PreferencesHelp>{t("preferences.reloadHelp")}</PreferencesHelp>
 
           <PreferenceToggle
             id="syncServersWithAccount"

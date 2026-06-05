@@ -24,6 +24,7 @@ const defaultState = {
   preferences: {
     autoFailoverEnabled: false,
     language: "auto",
+    reloadActiveTabOnToggle: false,
     syncServersWithAccount: false
   }
 };
@@ -107,6 +108,46 @@ function storageSyncSet(value) {
   });
 }
 
+function tabsQuery(queryInfo) {
+  if (!api.tabs?.query) {
+    return Promise.resolve([]);
+  }
+
+  if (api.tabs.query.length <= 1) {
+    return api.tabs.query(queryInfo);
+  }
+
+  return new Promise((resolve, reject) => {
+    api.tabs.query(queryInfo, (tabs) => {
+      if (api.runtime.lastError) {
+        reject(new Error(api.runtime.lastError.message));
+        return;
+      }
+      resolve(Array.isArray(tabs) ? tabs : []);
+    });
+  });
+}
+
+function tabsReload(tabId) {
+  if (!api.tabs?.reload || tabId === undefined || tabId === null) {
+    return Promise.resolve();
+  }
+
+  if (api.tabs.reload.length <= 1) {
+    return api.tabs.reload(tabId);
+  }
+
+  return new Promise((resolve, reject) => {
+    api.tabs.reload(tabId, {}, () => {
+      if (api.runtime.lastError) {
+        reject(new Error(api.runtime.lastError.message));
+        return;
+      }
+      resolve();
+    });
+  });
+}
+
 function proxySettingsSet(config) {
   if (api.proxy?.settings?.set.length <= 1) {
     return api.proxy.settings.set(config);
@@ -180,6 +221,24 @@ async function addLog(level, message, context) {
     context: context || null
   });
   await saveLogs(logs);
+}
+
+async function reloadCurrentActiveTab() {
+  try {
+    const tabs = await tabsQuery({ active: true, currentWindow: true });
+    const activeTab = tabs[0];
+    if (!activeTab?.id) {
+      return;
+    }
+    await tabsReload(activeTab.id);
+    await addLog("debug", "Pestana activa recargada tras cambio de proxy", {
+      tabId: activeTab.id
+    });
+  } catch (error) {
+    await addLog("warn", "No se pudo recargar la pestana activa", {
+      error: error instanceof Error ? error.message : String(error)
+    });
+  }
 }
 
 function getLogContext(payload) {
@@ -449,6 +508,9 @@ async function handleActivateServer(payload) {
 
   await saveState(state);
   await applyActiveProxy(state);
+  if (state.preferences?.reloadActiveTabOnToggle) {
+    await reloadCurrentActiveTab();
+  }
   await addLog("debug", "Estado actualizado tras activar/desactivar", {
     activeServerId: state.activeServerId
   });
@@ -470,6 +532,10 @@ async function handleUpdatePreferences(payload) {
       incoming.autoFailoverEnabled === undefined
         ? Boolean(state.preferences?.autoFailoverEnabled)
         : Boolean(incoming.autoFailoverEnabled),
+    reloadActiveTabOnToggle:
+      incoming.reloadActiveTabOnToggle === undefined
+        ? Boolean(state.preferences?.reloadActiveTabOnToggle)
+        : Boolean(incoming.reloadActiveTabOnToggle),
     syncServersWithAccount:
       incoming.syncServersWithAccount === undefined
         ? Boolean(state.preferences?.syncServersWithAccount)

@@ -66,7 +66,8 @@ function toYaml(value, indent = 0) {
 }
 
 function LogEntry({ log, t }) {
-  const normalizedLevel = String(log.level || "info").toLowerCase();
+  const rawLevel = String(log.level || "info").toLowerCase();
+  const normalizedLevel = rawLevel === "warn" ? "warning" : rawLevel;
   const level = normalizedLevel.toUpperCase();
   const message = String(log.message || t("messages.noMessage"));
   const rawTime = log.time ? new Date(log.time) : null;
@@ -117,7 +118,8 @@ export function LogsView({ t, logs, onClose }) {
 
   const filteredLogs = useMemo(() => {
     return logs.filter((log) => {
-      const normalizedLevel = String(log.level || "info").toLowerCase();
+      const rawLevel = String(log.level || "info").toLowerCase();
+      const normalizedLevel = rawLevel === "warn" ? "warning" : rawLevel;
       if (Object.prototype.hasOwnProperty.call(levelFilters, normalizedLevel)) {
         return Boolean(levelFilters[normalizedLevel]);
       }

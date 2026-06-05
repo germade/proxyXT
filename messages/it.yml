@@ -37,6 +37,7 @@ labels:
   bypassList: Bypass (separato da virgola)
   alias: Alias (opzionale)
   autoFailover: Failover automatico (round-robin)
+  reloadActiveTabOnToggle: Ricarica la scheda attiva quando attivi/disattivi un server
   syncServersWithAccount: Sincronizza i server con l'account del browser
   language: Lingua
 
@@ -65,8 +66,11 @@ messages:
   preferencesSaved: Preferenze salvate
   roundRobinEnabled: Round Robin attivato
   roundRobinDisabled: Round Robin disattivato
+  reloadOnToggleEnabled: Ricarica della scheda attiva attivata
+  reloadOnToggleDisabled: Ricarica della scheda attiva disattivata
   syncServersEnabled: Sincronizzazione server attivata
   syncServersDisabled: Sincronizzazione server disattivata
+  tabsPermissionDenied: Il permesso tabs e necessario per ricaricare la scheda attiva
   languageChanged: "Lingua: {{language}}"
   languageChangedAuto: "Lingua: Auto ({{language}})"
   logsLoadError: "Impossibile caricare i log: {{error}}"
@@ -74,4 +78,5 @@ messages:
 preferences:
   title: Preferenze
   help: Se il proxy attivo fallisce, l'estensione passera automaticamente al server salvato successivo.
+  reloadHelp: Ricarica la scheda corrente ogni volta che il proxy attivo viene attivato o disattivato.
   syncHelp: Salva i server nel tuo account browser per mantenerli disponibili sugli altri browser con accesso effettuato.

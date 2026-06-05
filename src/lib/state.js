@@ -4,6 +4,7 @@ export const defaultState = {
   preferences: {
     autoFailoverEnabled: false,
     language: "auto",
+    reloadActiveTabOnToggle: false,
     syncServersWithAccount: false
   }
 };
