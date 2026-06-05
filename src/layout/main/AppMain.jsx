@@ -26,11 +26,9 @@ export function AppMain({
   handleSubmitForm,
   handleDeleteServer,
   autoFailoverEnabled,
-  reloadActiveTabOnToggle,
   syncServersWithAccount,
   languagePreference,
   handleAutoFailoverChange,
-  handleReloadActiveTabChange,
   handleSyncServersWithAccountChange,
   handleLanguageChange
 }) {
@@ -69,11 +67,9 @@ export function AppMain({
         t={t}
         view={view}
         autoFailoverEnabled={autoFailoverEnabled}
-        reloadActiveTabOnToggle={reloadActiveTabOnToggle}
         syncServersWithAccount={syncServersWithAccount}
         language={languagePreference}
         onAutoFailoverChange={handleAutoFailoverChange}
-        onReloadActiveTabChange={handleReloadActiveTabChange}
         onSyncServersWithAccountChange={handleSyncServersWithAccountChange}
         onLanguageChange={handleLanguageChange}
       />

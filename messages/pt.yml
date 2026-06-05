@@ -37,7 +37,6 @@ labels:
   bypassList: Bypass (separado por virgula)
   alias: Alias (opcional)
   autoFailover: Failover automatico (round-robin)
-  reloadActiveTabOnToggle: Recarregar aba ativa ao ativar/desativar um servidor
   syncServersWithAccount: Sincronizar servidores com a conta do navegador
   language: Idioma
 
@@ -66,11 +65,8 @@ messages:
   preferencesSaved: Preferencias salvas
   roundRobinEnabled: Round Robin ativado
   roundRobinDisabled: Round Robin desativado
-  reloadOnToggleEnabled: Recarga da aba ativa ativada
-  reloadOnToggleDisabled: Recarga da aba ativa desativada
   syncServersEnabled: Sincronizacao de servidores ativada
   syncServersDisabled: Sincronizacao de servidores desativada
-  tabsPermissionDenied: A permissao de abas e necessaria para recarregar a aba ativa
   languageChanged: "Idioma: {{language}}"
   languageChangedAuto: "Idioma: Auto ({{language}})"
   logsLoadError: "Nao foi possivel carregar logs: {{error}}"
@@ -78,5 +74,4 @@ messages:
 preferences:
   title: Preferencias
   help: Se o proxy ativo falhar, a extensao trocara automaticamente para o proximo servidor salvo.
-  reloadHelp: Recarrega a aba atual sempre que o proxy ativo for ativado ou desativado.
   syncHelp: Salva seus servidores na conta do navegador para mantelos disponiveis nos outros navegadores conectados.

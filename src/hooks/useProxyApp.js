@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from "preact/hooks";
-import { containsPermissions, requestPermissions, sendMessage } from "../lib/runtime.js";
+import { sendMessage } from "../lib/runtime.js";
 import {
   defaultState,
   initialFormState,
@@ -284,7 +284,6 @@ export function useProxyApp() {
         preferences: {
           autoFailoverEnabled: enabled,
           language: state.preferences?.language || "auto",
-          reloadActiveTabOnToggle: Boolean(state.preferences?.reloadActiveTabOnToggle),
           syncServersWithAccount: Boolean(state.preferences?.syncServersWithAccount)
         }
       });
@@ -298,58 +297,6 @@ export function useProxyApp() {
         preferences: {
           ...current.preferences,
           autoFailoverEnabled: previous
-        }
-      }));
-      setFeedback({ message: error.message, isError: true });
-    }
-  }
-
-  async function handleReloadActiveTabChange(enabled) {
-    const previous = Boolean(state.preferences?.reloadActiveTabOnToggle);
-
-    if (enabled) {
-      try {
-        const hasTabsPermission = await containsPermissions(["tabs"]);
-        if (!hasTabsPermission) {
-          const granted = await requestPermissions(["tabs"]);
-          if (!granted) {
-            setFeedback({ message: t("messages.tabsPermissionDenied"), isError: true });
-            return;
-          }
-        }
-      } catch (error) {
-        setFeedback({ message: error.message || t("messages.tabsPermissionDenied"), isError: true });
-        return;
-      }
-    }
-
-    setState((current) => ({
-      ...current,
-      preferences: {
-        ...current.preferences,
-        reloadActiveTabOnToggle: enabled
-      }
-    }));
-
-    try {
-      await callBackground("proxyxt/updatePreferences", {
-        preferences: {
-          autoFailoverEnabled: Boolean(state.preferences?.autoFailoverEnabled),
-          language: state.preferences?.language || "auto",
-          reloadActiveTabOnToggle: enabled,
-          syncServersWithAccount: Boolean(state.preferences?.syncServersWithAccount)
-        }
-      });
-      setFeedback({
-        message: enabled ? t("messages.reloadOnToggleEnabled") : t("messages.reloadOnToggleDisabled"),
-        isError: false
-      });
-    } catch (error) {
-      setState((current) => ({
-        ...current,
-        preferences: {
-          ...current.preferences,
-          reloadActiveTabOnToggle: previous
         }
       }));
       setFeedback({ message: error.message, isError: true });
@@ -371,7 +318,6 @@ export function useProxyApp() {
         preferences: {
           autoFailoverEnabled: Boolean(state.preferences?.autoFailoverEnabled),
           language: state.preferences?.language || "auto",
-          reloadActiveTabOnToggle: Boolean(state.preferences?.reloadActiveTabOnToggle),
           syncServersWithAccount: enabled
         }
       });
@@ -412,7 +358,6 @@ export function useProxyApp() {
         preferences: {
           autoFailoverEnabled: Boolean(state.preferences?.autoFailoverEnabled),
           language: nextLanguage,
-          reloadActiveTabOnToggle: Boolean(state.preferences?.reloadActiveTabOnToggle),
           syncServersWithAccount: Boolean(state.preferences?.syncServersWithAccount)
         }
       });
@@ -454,7 +399,6 @@ export function useProxyApp() {
     servers: state.servers,
     activeServerId: state.activeServerId,
     autoFailoverEnabled: state.preferences?.autoFailoverEnabled,
-    reloadActiveTabOnToggle: state.preferences?.reloadActiveTabOnToggle,
     syncServersWithAccount: state.preferences?.syncServersWithAccount,
     languagePreference,
     effectiveLanguage,
@@ -468,7 +412,6 @@ export function useProxyApp() {
     handleSubmitForm,
     handleDeleteServer,
     handleAutoFailoverChange,
-    handleReloadActiveTabChange,
     handleSyncServersWithAccountChange,
     handleLanguageChange
   };
