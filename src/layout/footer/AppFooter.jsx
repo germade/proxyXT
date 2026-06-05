@@ -12,7 +12,7 @@ import { StyledAppFooter } from "./AppFooter.styles.jsx";
 export function AppFooter({
   isHidden = false,
   footerFeedbackMessage,
-  footerFeedbackStyle,
+  isFooterFeedbackError,
   handleOpenList,
   t,
   activeServerId,
@@ -28,7 +28,7 @@ export function AppFooter({
     <StyledAppFooter $isHidden={isHidden}>
       <div>
         {footerFeedbackMessage ? (
-          <ActiveFooter id="activeFooter" style={footerFeedbackStyle}>
+          <ActiveFooter id="activeFooter" $isFeedback $isError={isFooterFeedbackError}>
             {footerFeedbackMessage}
           </ActiveFooter>
         ) : (

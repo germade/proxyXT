@@ -17,6 +17,7 @@ export function useProxyApp() {
   const [feedback, setFeedback] = useState(null);
   const [logs, setLogs] = useState([]);
   const [hasErrorLogs, setHasErrorLogs] = useState(false);
+  const [isInitialStateLoading, setIsInitialStateLoading] = useState(true);
 
   const languagePreference = state.preferences?.language || "auto";
   const effectiveLanguage = resolveLanguage(languagePreference, globalThis.navigator?.language);
@@ -39,7 +40,7 @@ export function useProxyApp() {
     ? `${activeServer.host}:${activeServer.port}`
     : t("footer.system");
   const footerFeedbackMessage = feedback?.message || null;
-  const footerFeedbackStyle = feedback ? { color: feedback.isError ? "#b03838" : "#206b35" } : {};
+  const isFooterFeedbackError = Boolean(feedback?.isError);
 
   async function callBackground(type, payload = {}) {
     const response = await sendMessage({ type, payload });
@@ -61,6 +62,19 @@ export function useProxyApp() {
     setHasErrorLogs(data.some((log) => log.level === "error"));
   }
 
+  async function handleClearLogs() {
+    try {
+      const response = await callBackground("proxyxt/clearLogs");
+      const nextLogs = Array.isArray(response.logs) ? response.logs : [];
+      setLogs(nextLogs);
+      setHasErrorLogs(false);
+      setFeedback({ message: t("messages.logsCleared"), isError: false });
+    } catch (error) {
+      setFeedback({ message: t("messages.logsClearError", { error: error.message }), isError: true });
+      throw error;
+    }
+  }
+
   useEffect(() => {
     let isMounted = true;
 
@@ -76,6 +90,10 @@ export function useProxyApp() {
       } catch (error) {
         if (isMounted) {
           setFeedback({ message: error.message, isError: true });
+        }
+      } finally {
+        if (isMounted) {
+          setIsInitialStateLoading(false);
         }
       }
     })();
@@ -438,6 +456,10 @@ export function useProxyApp() {
     }
   }
 
+  function handleLogsFeedback(message, isError = false) {
+    setFeedback({ message, isError: Boolean(isError) });
+  }
+
   return {
     t,
     view,
@@ -447,10 +469,11 @@ export function useProxyApp() {
     subtitle,
     activeProxyDisplay,
     footerFeedbackMessage,
-    footerFeedbackStyle,
+    isFooterFeedbackError,
     logs,
     logsPanelHeight,
     hasErrorLogs,
+    isInitialStateLoading,
     servers: state.servers,
     activeServerId: state.activeServerId,
     autoFailoverEnabled: state.preferences?.autoFailoverEnabled,
@@ -463,6 +486,8 @@ export function useProxyApp() {
     handleOpenPreferences,
     handleTogglePreferences,
     handleToggleLogs,
+    handleClearLogs,
+    handleLogsFeedback,
     handleToggleServer,
     openFormForEdit,
     handleSubmitForm,

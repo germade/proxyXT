@@ -103,6 +103,33 @@ export const FilterLabel = styled.label`
   font-size: 0.68rem;
   color: #30445f;
   font-family: "SF Mono", "Consolas", monospace;
+
+  &:hover {
+    color: #203c5c;
+  }
+`;
+
+export const FilterTextButton = styled.button`
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  color: inherit;
+  font: inherit;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+  }
+
+  &:focus-visible {
+    outline: none;
+    text-decoration: underline;
+  }
 `;
 
 export const FilterCheckbox = styled.input`
@@ -136,6 +163,10 @@ export const OpenWindowButton = styled.button`
   }
 `;
 
+export const CopyLogsButton = styled(OpenWindowButton)``;
+
+export const ClearLogsButton = styled(OpenWindowButton)``;
+
 export const CloseWindowButton = styled(OpenWindowButton)``;
 
 export const LogsContent = styled.div`
@@ -146,6 +177,67 @@ export const LogsContent = styled.div`
   display: flex;
   flex-direction: column;
   gap: 8px;
+`;
+
+export const ConfirmOverlay = styled.div`
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(18, 28, 42, 0.82);
+  backdrop-filter: blur(6px);
+`;
+
+export const ConfirmCard = styled.div`
+  width: min(180px, 100%);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+`;
+
+export const ConfirmText = styled.p`
+  margin: 0;
+  text-align: center;
+  color: #ffffff;
+  font-size: 0.76rem;
+  line-height: 1.4;
+`;
+
+export const ConfirmDangerButton = styled.button`
+  border: none;
+  border-radius: 8px;
+  background: #cc2f2f;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.72rem;
+  padding: 7px 14px;
+  cursor: pointer;
+  transition: background 120ms ease;
+
+  &:hover {
+    background: #b62828;
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.28);
+  }
+`;
+
+export const ConfirmDismissButton = styled.button`
+  border: none;
+  background: transparent;
+  color: #d9e6f7;
+  font-size: 0.68rem;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
 `;
 
 export const LogEntryContainer = styled.div`

@@ -13,6 +13,7 @@ export function AppMain({
   t,
   subtitle,
   view,
+  isInitialStateLoading,
   handleOpenList,
   handleTogglePreferences,
   handlePrimaryAction,
@@ -48,6 +49,7 @@ export function AppMain({
       <ListView
         t={t}
         view={view}
+        isInitialStateLoading={isInitialStateLoading}
         servers={servers}
         activeServerId={activeServerId}
         onToggle={handleToggleServer}

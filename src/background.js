@@ -5,6 +5,9 @@ const SYNC_SERVERS_KEY = "proxyxt-sync-servers";
 const LOGS_KEY = "proxyxt-logs";
 const MAX_LOGS = 200;
 const FAILOVER_COOLDOWN_MS = 5000;
+const CONNECTIVITY_CHECK_COOLDOWN_MS = 4000;
+const CONNECTIVITY_CHECK_TIMEOUT_MS = 3500;
+const CONNECTIVITY_CHECK_URL = "https://clients3.google.com/generate_204";
 const ACTIVE_ICON_PATHS = {
   16: "icons/proxyxt-16.png",
   32: "icons/proxyxt-32.png",
@@ -31,6 +34,7 @@ const defaultState = {
 
 let failoverInProgress = false;
 let lastFailoverAt = 0;
+let lastConnectivityCheckAt = 0;
 
 function generateId() {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
@@ -213,10 +217,11 @@ async function saveLogs(logs) {
 }
 
 async function addLog(level, message, context) {
+  const normalizedLevel = level === "warn" ? "warning" : level;
   const logs = await loadLogs();
   logs.push({
     time: new Date().toISOString(),
-    level,
+    level: normalizedLevel,
     message,
     context: context || null
   });
@@ -390,23 +395,45 @@ function sanitizeServer(rawServer) {
 
 async function pullServersFromSyncIfEnabled(state) {
   if (!state.preferences?.syncServersWithAccount || !api.storage?.sync) {
+    if (state.preferences?.syncServersWithAccount && !api.storage?.sync) {
+      await addLog("warning", "storage.sync no disponible; no se pueden recuperar servidores", null);
+    }
     return state;
   }
 
-  const result = await storageSyncGet(SYNC_SERVERS_KEY);
+  const result = await storageSyncGet([SYNC_SERVERS_KEY, STORAGE_KEY]);
   const syncedServersRaw = result?.[SYNC_SERVERS_KEY];
-  if (!Array.isArray(syncedServersRaw)) {
+  const legacyState = result?.[STORAGE_KEY];
+  const legacyServersRaw = Array.isArray(legacyState?.servers) ? legacyState.servers : null;
+
+  const sourceRaw = Array.isArray(syncedServersRaw)
+    ? syncedServersRaw
+    : Array.isArray(legacyServersRaw)
+      ? legacyServersRaw
+      : null;
+
+  if (!Array.isArray(sourceRaw)) {
+    await addLog("debug", "No hay servidores disponibles en storage.sync", null);
     return state;
   }
 
   const syncedServers = [];
-  for (const raw of syncedServersRaw) {
+  let skipped = 0;
+  for (const raw of sourceRaw) {
     try {
       syncedServers.push(sanitizeServer(raw));
     } catch (_error) {
       // Skip invalid synced entries instead of failing the whole sync process.
+      skipped += 1;
     }
   }
+
+  await addLog("debug", "Lectura de servidores desde storage.sync", {
+    source: Array.isArray(syncedServersRaw) ? SYNC_SERVERS_KEY : STORAGE_KEY,
+    received: sourceRaw.length,
+    valid: syncedServers.length,
+    skipped
+  });
 
   const localSnapshot = JSON.stringify(state.servers);
   const syncedSnapshot = JSON.stringify(syncedServers);
@@ -437,11 +464,22 @@ async function pushServersToSyncIfEnabled(state) {
 
 async function handleGetState() {
   const state = await loadState();
-  return pullServersFromSyncIfEnabled(state);
+  const syncedState = await pullServersFromSyncIfEnabled(state);
+
+  if (syncedState.preferences?.autoFailoverEnabled && syncedState.activeServerId) {
+    void probeProxyConnectivityAndFailoverIfNeeded();
+  }
+
+  return syncedState;
 }
 
 async function handleGetLogs() {
   return loadLogs();
+}
+
+async function handleClearLogs() {
+  await saveLogs([]);
+  return [];
 }
 
 async function handleSaveServer(payload) {
@@ -573,12 +611,22 @@ function getNextServerForRoundRobin(state) {
 }
 
 async function maybeFailoverOnProxyError(details) {
+  await addLog("debug", "Evaluando failover por error de proxy", {
+    error: details?.error || null,
+    fatal: Boolean(details?.fatal)
+  });
+
   if (failoverInProgress) {
+    await addLog("debug", "Failover omitido: ya hay uno en progreso", null);
     return;
   }
 
   const now = Date.now();
   if (now - lastFailoverAt < FAILOVER_COOLDOWN_MS) {
+    await addLog("debug", "Failover omitido: cooldown activo", {
+      cooldownMs: FAILOVER_COOLDOWN_MS,
+      elapsedMs: now - lastFailoverAt
+    });
     return;
   }
 
@@ -586,11 +634,16 @@ async function maybeFailoverOnProxyError(details) {
   try {
     const state = await loadState();
     if (!state.preferences.autoFailoverEnabled) {
+      await addLog("debug", "Failover omitido: autoFailover desactivado", null);
       return;
     }
 
     const nextServer = getNextServerForRoundRobin(state);
     if (!nextServer) {
+      await addLog("debug", "Failover omitido: no hay siguiente servidor disponible", {
+        activeServerId: state.activeServerId,
+        totalServers: Array.isArray(state.servers) ? state.servers.length : 0
+      });
       return;
     }
 
@@ -616,6 +669,83 @@ async function maybeFailoverOnProxyError(details) {
   } finally {
     failoverInProgress = false;
   }
+}
+
+async function probeProxyConnectivityAndFailoverIfNeeded() {
+  const now = Date.now();
+  if (now - lastConnectivityCheckAt < CONNECTIVITY_CHECK_COOLDOWN_MS) {
+    return;
+  }
+  lastConnectivityCheckAt = now;
+
+  let controller;
+  let timeoutId;
+  let didTimeout = false;
+  try {
+    controller = new AbortController();
+    timeoutId = globalThis.setTimeout(() => {
+      didTimeout = true;
+      controller.abort();
+    }, CONNECTIVITY_CHECK_TIMEOUT_MS);
+
+    const response = await fetch(CONNECTIVITY_CHECK_URL, {
+      cache: "no-store",
+      redirect: "follow",
+      signal: controller.signal
+    });
+
+    if (response?.status !== 204) {
+      await addLog("warning", "Health-check detecto respuesta anomala", {
+        status: response?.status || null,
+        statusText: response?.statusText || null,
+        url: CONNECTIVITY_CHECK_URL
+      });
+      await maybeFailoverOnProxyError({
+        error: `HEALTHCHECK_HTTP_${response?.status || "UNKNOWN"}`,
+        fatal: false,
+        details: {
+          source: "healthcheck",
+          status: response?.status || null,
+          url: CONNECTIVITY_CHECK_URL
+        }
+      });
+    }
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    const isAbortError = error instanceof Error && error.name === "AbortError";
+
+    if (didTimeout || isAbortError) {
+      await addLog("warning", "Health-check agotado por timeout", {
+        timeoutMs: CONNECTIVITY_CHECK_TIMEOUT_MS,
+        error: errorMessage,
+        url: CONNECTIVITY_CHECK_URL
+      });
+    } else {
+      await addLog("error", "Health-check detecto fallo de conectividad", {
+        error: errorMessage,
+        url: CONNECTIVITY_CHECK_URL
+      });
+    }
+
+    await maybeFailoverOnProxyError({
+      error: errorMessage,
+      fatal: false,
+      details: {
+        source: "healthcheck",
+        reason: didTimeout || isAbortError ? "timeout" : "network_error",
+        url: CONNECTIVITY_CHECK_URL
+      }
+    });
+  } finally {
+    if (timeoutId) {
+      globalThis.clearTimeout(timeoutId);
+    }
+  }
+}
+
+function isProxyRelatedRequestError(details) {
+  const code = String(details?.error || "").toUpperCase();
+  return code.includes("PROXY") || code.includes("TUNNEL") || code.includes("SOCKS");
 }
 
 api.runtime.onInstalled.addListener(async () => {
@@ -654,7 +784,54 @@ api.runtime.onStartup?.addListener(async () => {
 const proxyErrorEvent = api.proxy?.onProxyError;
 if (proxyErrorEvent?.addListener) {
   proxyErrorEvent.addListener((details) => {
+    addLog("error", "Evento proxy.onProxyError detectado", {
+      error: details?.error || null,
+      fatal: Boolean(details?.fatal),
+      hasDetails: Boolean(details?.details)
+    }).catch(() => {
+      // Ignore logging failures in event callback.
+    });
     maybeFailoverOnProxyError(details);
+  });
+} else {
+  addLog("error", "proxy.onProxyError no esta disponible en este entorno", null).catch(() => {
+    // Ignore logging failures during startup.
+  });
+}
+
+const webRequestErrorEvent = api.webRequest?.onErrorOccurred;
+if (webRequestErrorEvent?.addListener) {
+  webRequestErrorEvent.addListener(
+    (details) => {
+      if (!isProxyRelatedRequestError(details)) {
+        return;
+      }
+
+      addLog("error", "Evento webRequest.onErrorOccurred detectado", {
+        error: details?.error || null,
+        url: details?.url || null,
+        type: details?.type || null,
+        tabId: typeof details?.tabId === "number" ? details.tabId : null
+      }).catch(() => {
+        // Ignore logging failures in event callback.
+      });
+
+      maybeFailoverOnProxyError({
+        error: details?.error || null,
+        fatal: false,
+        details: {
+          source: "webRequest.onErrorOccurred",
+          url: details?.url || null,
+          type: details?.type || null,
+          tabId: typeof details?.tabId === "number" ? details.tabId : null
+        }
+      });
+    },
+    { urls: ["<all_urls>"] }
+  );
+} else {
+  addLog("warning", "webRequest.onErrorOccurred no disponible en este entorno", null).catch(() => {
+    // Ignore logging failures during startup.
   });
 }
 
@@ -674,6 +851,11 @@ api.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 
     if (actionType === "proxyxt/getLogs") {
       const logs = await handleGetLogs();
+      return { logs };
+    }
+
+    if (actionType === "proxyxt/clearLogs") {
+      const logs = await handleClearLogs();
       return { logs };
     }
 

@@ -19,7 +19,11 @@ buttons:
     show: Afficher les logs backend
     hide: Masquer les logs backend
     title: Logs backend
+    copy: Copier les logs
     filters: Filtres
+    clear: Effacer les logs
+    confirmClear: Confirmer l'effacement
+    cancelClear: Annuler
     openInWindow: Ouvrir dans une nouvelle fenetre
     closeWindow: Fermer la fenetre
   server:
@@ -74,6 +78,11 @@ messages:
   languageChanged: "Langue: {{language}}"
   languageChangedAuto: "Langue: Auto ({{language}})"
   logsLoadError: "Impossible de charger les logs: {{error}}"
+  logsCopied: Logs copies
+  logsCopyFailed: Echec de copie des logs
+  logsCleared: Historique des logs efface
+  logsClearError: "Impossible d'effacer les logs: {{error}}"
+  logsClearConfirm: Cette action supprimera tout l'historique des logs.
 
 preferences:
   title: Preferences

@@ -19,7 +19,11 @@ buttons:
     show: Show backend logs
     hide: Hide backend logs
     title: Backend logs
+    copy: Copy logs
     filters: Filters
+    clear: Clear logs
+    confirmClear: Confirm clear
+    cancelClear: Cancel
     openInWindow: Open in new window
     closeWindow: Close window
   server:
@@ -74,6 +78,11 @@ messages:
   languageChanged: "Language: {{language}}"
   languageChangedAuto: "Language: Auto ({{language}})"
   logsLoadError: "Could not load logs: {{error}}"
+  logsCopied: Logs copied
+  logsCopyFailed: Failed to copy logs
+  logsCleared: Log history cleared
+  logsClearError: "Could not clear logs: {{error}}"
+  logsClearConfirm: This action will remove the full log history.
 
 preferences:
   title: Preferences

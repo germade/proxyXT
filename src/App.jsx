@@ -19,10 +19,11 @@ export function App() {
     subtitle,
     activeProxyDisplay,
     footerFeedbackMessage,
-    footerFeedbackStyle,
+    isFooterFeedbackError,
     logs,
     logsPanelHeight,
     hasErrorLogs,
+    isInitialStateLoading,
     servers,
     activeServerId,
     autoFailoverEnabled,
@@ -35,6 +36,8 @@ export function App() {
     handleOpenPreferences,
     handleTogglePreferences,
     handleToggleLogs,
+    handleClearLogs,
+    handleLogsFeedback,
     handleToggleServer,
     openFormForEdit,
     handleSubmitForm,
@@ -51,7 +54,13 @@ export function App() {
     <Fragment>
       <ContentStack style={stackedStyle}>
         <LogsLayer isVisible={view === "logs"}>
-          <LogsView t={t} logs={logs} onClose={handleOpenList} />
+          <LogsView
+            t={t}
+            logs={logs}
+            onClose={handleOpenList}
+            onClearLogs={handleClearLogs}
+            onFeedback={handleLogsFeedback}
+          />
         </LogsLayer>
 
         <AppMain
@@ -61,6 +70,7 @@ export function App() {
           t={t}
           subtitle={subtitle}
           view={view}
+          isInitialStateLoading={isInitialStateLoading}
           handleOpenList={handleOpenList}
           handleTogglePreferences={handleTogglePreferences}
           handlePrimaryAction={handlePrimaryAction}
@@ -87,7 +97,7 @@ export function App() {
       <AppFooter
         isHidden={view === "form"}
         footerFeedbackMessage={footerFeedbackMessage}
-        footerFeedbackStyle={footerFeedbackStyle}
+        isFooterFeedbackError={isFooterFeedbackError}
         handleOpenList={handleOpenList}
         t={t}
         activeServerId={activeServerId}

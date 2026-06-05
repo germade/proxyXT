@@ -38,8 +38,19 @@ function ServerRow({ server, activeServerId, onToggle, onEdit, getServerDisplayN
   );
 }
 
-export function ListView({ t, view, servers, activeServerId, onToggle, onEdit, getServerDisplayName, onAddServer }) {
+export function ListView({
+  t,
+  view,
+  isInitialStateLoading,
+  servers,
+  activeServerId,
+  onToggle,
+  onEdit,
+  getServerDisplayName,
+  onAddServer
+}) {
   const isEmpty = !servers.length;
+  const showEmptyState = !isInitialStateLoading && isEmpty;
 
   return (
     <ListPanel $isVisible={view === "list"}>
@@ -57,7 +68,7 @@ export function ListView({ t, view, servers, activeServerId, onToggle, onEdit, g
             />
           ))}
         </ServerList>
-        <EmptyStateCard $isVisible={isEmpty}>
+        <EmptyStateCard $isVisible={showEmptyState}>
           <EmptyStateMessage>{t("messages.noServers")}</EmptyStateMessage>
           <EmptyStateActionButton type="button" onClick={onAddServer}>
             {t("app.subtitle.addProxy")}

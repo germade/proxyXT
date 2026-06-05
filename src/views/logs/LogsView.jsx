@@ -1,14 +1,24 @@
 import { h } from "preact";
 import { useMemo, useState } from "preact/hooks";
+import { BanSymbolSvg } from "../../components/icons/BanSymbolSvg.jsx";
+import { CopySymbolSvg } from "../../components/icons/CopySymbolSvg.jsx";
 import { CrossSymbolSvg } from "../../components/icons/CrossSymbolSvg.jsx";
 import { FilterSymbolSvg } from "../../components/icons/FilterSymbolSvg.jsx";
 import { NewWindowSvg } from "../../components/icons/NewWindowSvg.jsx";
 import {
+  CopyLogsButton,
   CloseWindowButton,
+  ClearLogsButton,
+  ConfirmCard,
+  ConfirmDangerButton,
+  ConfirmDismissButton,
+  ConfirmOverlay,
+  ConfirmText,
   FilterCheckbox,
   FilterLabel,
   FilterMenu,
   FilterMenuPanel,
+  FilterTextButton,
   FilterToggleButton,
   LogContext,
   LogEntryContainer,
@@ -82,7 +92,17 @@ function LogEntry({ log, t }) {
   );
 }
 
-export function LogsView({ t, logs, onClose }) {
+function serializeLogForClipboard(log) {
+  const rawLevel = String(log.level || "info").toLowerCase();
+  const normalizedLevel = rawLevel === "warn" ? "warning" : rawLevel;
+  const time = String(log.time || "");
+  const message = String(log.message || "");
+  const contextBlock = log.context ? `\ncontext:\n${toYaml(log.context, 1)}` : "";
+  return `${time} [${normalizedLevel.toUpperCase()}] ${message}${contextBlock}`;
+}
+
+export function LogsView({ t, logs, onClose, onClearLogs, onFeedback }) {
+    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [levelFilters, setLevelFilters] = useState({
     success: true,
     info: true,
@@ -100,6 +120,14 @@ export function LogsView({ t, logs, onClose }) {
   const openInWindowLabel = t("buttons.logs.openInWindow");
   const closeWindowLabel = t("buttons.logs.closeWindow");
   const filtersLabel = t("buttons.logs.filters");
+  const clearLogsLabel = t("buttons.logs.clear");
+  const copyLogsLabel = t("buttons.logs.copy");
+  const confirmClearLabel = t("buttons.logs.confirmClear");
+  const cancelClearLabel = t("buttons.logs.cancelClear");
+  const logsCopiedLabel = t("messages.logsCopied");
+  const logsCopyFailedLabel = t("messages.logsCopyFailed");
+  const clearConfirmText = t("messages.logsClearConfirm");
+  const noLogsLabel = t("messages.noLogs");
 
   function handleCloseWindow() {
     if (typeof onClose === "function") {
@@ -116,6 +144,27 @@ export function LogsView({ t, logs, onClose }) {
     }));
   }
 
+  function selectOnlyLevel(level) {
+    setLevelFilters((current) => {
+      const isAlreadyOnlyThis = LOG_LEVELS.every((item) => current[item] === (item === level));
+
+      // Toggle solo mode: only this level <-> all levels enabled.
+      if (isAlreadyOnlyThis) {
+        const allEnabled = {};
+        for (const item of LOG_LEVELS) {
+          allEnabled[item] = true;
+        }
+        return allEnabled;
+      }
+
+      const onlyThis = {};
+      for (const item of LOG_LEVELS) {
+        onlyThis[item] = item === level;
+      }
+      return onlyThis;
+    });
+  }
+
   const filteredLogs = useMemo(() => {
     return logs.filter((log) => {
       const rawLevel = String(log.level || "info").toLowerCase();
@@ -127,11 +176,80 @@ export function LogsView({ t, logs, onClose }) {
     });
   }, [logs, levelFilters]);
 
+  const orderedLogs = useMemo(() => {
+    return [...filteredLogs].sort((left, right) => {
+      const leftTime = new Date(left?.time || 0).getTime();
+      const rightTime = new Date(right?.time || 0).getTime();
+      return rightTime - leftTime;
+    });
+  }, [filteredLogs]);
+
+  async function handleCopyLogs() {
+    const text = orderedLogs.length ? orderedLogs.map((log) => serializeLogForClipboard(log)).join("\n\n") : "";
+
+    try {
+      if (globalThis.navigator?.clipboard?.writeText) {
+        await globalThis.navigator.clipboard.writeText(text);
+        onFeedback?.(logsCopiedLabel, false);
+        return;
+      }
+    } catch (_error) {
+      // Fallback below.
+    }
+
+    try {
+      const textarea = globalThis.document?.createElement("textarea");
+      if (!textarea) {
+        onFeedback?.(logsCopyFailedLabel, true);
+        return;
+      }
+      textarea.value = text;
+      textarea.setAttribute("readonly", "true");
+      textarea.style.position = "fixed";
+      textarea.style.opacity = "0";
+      globalThis.document.body.appendChild(textarea);
+      textarea.select();
+      const copied = globalThis.document.execCommand("copy");
+      globalThis.document.body.removeChild(textarea);
+      onFeedback?.(copied ? logsCopiedLabel : logsCopyFailedLabel, !copied);
+    } catch (_error) {
+      onFeedback?.(logsCopyFailedLabel, true);
+    }
+  }
+
+  function handleOpenClearConfirm() {
+    if (!orderedLogs.length) {
+      onFeedback?.(noLogsLabel, false);
+      return;
+    }
+    setIsConfirmOpen(true);
+  }
+
+  function handleDismissClearConfirm() {
+    setIsConfirmOpen(false);
+  }
+
+  async function handleConfirmClearLogs() {
+    if (typeof onClearLogs !== "function") {
+      return;
+    }
+
+    try {
+      await onClearLogs();
+      setIsConfirmOpen(false);
+    } catch (_error) {
+      setIsConfirmOpen(false);
+    }
+  }
+
   return (
     <LogsPanel>
       <LogsToolbar>
         <ToolbarTitle>{t("buttons.logs.title")}</ToolbarTitle>
         <ToolbarActions>
+          <CopyLogsButton type="button" onClick={handleCopyLogs} title={copyLogsLabel} aria-label={copyLogsLabel}>
+            <CopySymbolSvg size={13} />
+          </CopyLogsButton>
           <FilterMenu>
             <FilterToggleButton title={filtersLabel} aria-label={filtersLabel}>
               <FilterSymbolSvg size={16} />
@@ -144,11 +262,28 @@ export function LogsView({ t, logs, onClose }) {
                     checked={Boolean(levelFilters[level])}
                     onChange={(event) => toggleLevelFilter(level, event.currentTarget.checked)}
                   />
-                  {level.toUpperCase()}
+                  <FilterTextButton
+                    type="button"
+                    onClick={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      selectOnlyLevel(level);
+                    }}
+                  >
+                    {level.toUpperCase()}
+                  </FilterTextButton>
                 </FilterLabel>
               ))}
             </FilterMenuPanel>
           </FilterMenu>
+          <ClearLogsButton
+            type="button"
+            onClick={handleOpenClearConfirm}
+            title={clearLogsLabel}
+            aria-label={clearLogsLabel}
+          >
+            <BanSymbolSvg size={12} />
+          </ClearLogsButton>
           <OpenWindowButton
             type="button"
             onClick={handleOpenInNewWindow}
@@ -168,10 +303,24 @@ export function LogsView({ t, logs, onClose }) {
         </ToolbarActions>
       </LogsToolbar>
       <LogsContent>
-        {filteredLogs.length
-          ? filteredLogs.map((log, index) => <LogEntry key={`${log.time || index}-${index}`} log={log} t={t} />)
+        {orderedLogs.length
+          ? orderedLogs.map((log, index) => <LogEntry key={`${log.time || index}-${index}`} log={log} t={t} />)
           : t("messages.noLogs")}
       </LogsContent>
+
+      {isConfirmOpen ? (
+        <ConfirmOverlay role="dialog" aria-modal="true" aria-label={clearLogsLabel}>
+          <ConfirmCard>
+            <ConfirmText>{clearConfirmText}</ConfirmText>
+            <ConfirmDangerButton type="button" onClick={handleConfirmClearLogs}>
+              {confirmClearLabel}
+            </ConfirmDangerButton>
+            <ConfirmDismissButton type="button" onClick={handleDismissClearConfirm}>
+              {cancelClearLabel}
+            </ConfirmDismissButton>
+          </ConfirmCard>
+        </ConfirmOverlay>
+      ) : null}
     </LogsPanel>
   );
 }
