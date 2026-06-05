@@ -11,6 +11,28 @@ const cardEnter = keyframes`
   }
 `;
 
+const driftStars = keyframes`
+  from { background-position: 0 0, 28px 22px; }
+  to   { background-position: 28px 18px, 56px 40px; }
+`;
+
+const driftMoons = keyframes`
+  from { background-position: 0 0, 40px 32px; }
+  to   { background-position: -22px 24px, 18px 56px; }
+`;
+
+// Light shapes (for dark backgrounds)
+const STAR_L    = `url("data:image/svg+xml,%3Csvg width='10' height='10' viewBox='0 0 10 10' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolygon points='5,0 6.5,3.5 10,5 6.5,6.5 5,10 3.5,6.5 0,5 3.5,3.5' fill='%23c8d8e8' opacity='0.55'/%3E%3C/svg%3E")`;
+const STAR_SM_L = `url("data:image/svg+xml,%3Csvg width='6' height='6' viewBox='0 0 10 10' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolygon points='5,0 6.5,3.5 10,5 6.5,6.5 5,10 3.5,6.5 0,5 3.5,3.5' fill='%23c8d8e8' opacity='0.4'/%3E%3C/svg%3E")`;
+const MOON_L    = `url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' d='M10,2 A8,8,0,1,0,10,18 A8,8,0,1,0,10,2 Z M7,4 A6,6,0,1,0,7,16 A6,6,0,1,0,7,4 Z' fill='%23c8d8e8' opacity='0.45'/%3E%3C/svg%3E")`;
+const MOON_SM_L = `url("data:image/svg+xml,%3Csvg width='8' height='8' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' d='M10,2 A8,8,0,1,0,10,18 A8,8,0,1,0,10,2 Z M7,4 A6,6,0,1,0,7,16 A6,6,0,1,0,7,4 Z' fill='%23c8d8e8' opacity='0.35'/%3E%3C/svg%3E")`;
+
+// Dark shapes (for light backgrounds)
+const STAR_D    = `url("data:image/svg+xml,%3Csvg width='10' height='10' viewBox='0 0 10 10' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolygon points='5,0 6.5,3.5 10,5 6.5,6.5 5,10 3.5,6.5 0,5 3.5,3.5' fill='%231e3246' opacity='0.4'/%3E%3C/svg%3E")`;
+const STAR_SM_D = `url("data:image/svg+xml,%3Csvg width='6' height='6' viewBox='0 0 10 10' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolygon points='5,0 6.5,3.5 10,5 6.5,6.5 5,10 3.5,6.5 0,5 3.5,3.5' fill='%231e3246' opacity='0.3'/%3E%3C/svg%3E")`;
+const MOON_D    = `url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' d='M10,2 A8,8,0,1,0,10,18 A8,8,0,1,0,10,2 Z M7,4 A6,6,0,1,0,7,16 A6,6,0,1,0,7,4 Z' fill='%231e3246' opacity='0.35'/%3E%3C/svg%3E")`;
+const MOON_SM_D = `url("data:image/svg+xml,%3Csvg width='8' height='8' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' d='M10,2 A8,8,0,1,0,10,18 A8,8,0,1,0,10,2 Z M7,4 A6,6,0,1,0,7,16 A6,6,0,1,0,7,4 Z' fill='%231e3246' opacity='0.3'/%3E%3C/svg%3E")`;
+
 export const ListPanel = styled.section`
   min-height: 192px;
   display: ${({ $isVisible }) => ($isVisible ? "block" : "none")};
@@ -64,7 +86,7 @@ export const ServerListItem = styled.div`
     background: ${({ $rowColor }) => $rowColor || "var(--brand-orange)"};
     opacity: ${({ $isActive }) => ($isActive ? 0 : 0.60)};
     pointer-events: none;
-    z-index: 2;
+    z-index: 4;
     transition: opacity 120ms ease;
   }
 
@@ -101,6 +123,8 @@ export const ServerMainButton = styled.button`
   min-height: ${({ $noMeta }) => ($noMeta ? "48px" : "auto")};
   justify-content: ${({ $noMeta }) => ($noMeta ? "center" : "flex-start")};
   cursor: pointer;
+  position: relative;
+  z-index: 2;
 
   &:hover {
     background: ${({ $isActive, $activeColor }) => ($isActive ? $activeColor : "#f4f8ff")};
@@ -138,6 +162,8 @@ export const ServerEditButton = styled.button`
   place-items: center;
   transition: background 120ms ease, color 120ms ease;
   cursor: pointer;
+  position: relative;
+  z-index: 2;
 
   &:hover {
     background: #ffd9c4;
@@ -186,5 +212,34 @@ export const EmptyStateActionButton = styled.button`
   &:focus-visible {
     outline: none;
     box-shadow: 0 0 0 2px rgba(9, 103, 212, 0.24);
+  }
+`;
+
+export const ServerActivePatternOverlay = styled.span`
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 3;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      ${({ $v }) => $v === "dark" ? STAR_D    : STAR_L}    0    0    / 54px 42px repeat,
+      ${({ $v }) => $v === "dark" ? STAR_SM_D : STAR_SM_L} 28px 22px / 42px 34px repeat;
+    animation: ${driftStars} 14s ease-in-out infinite alternate;
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      ${({ $v }) => $v === "dark" ? MOON_D    : MOON_L}    0    0    / 80px 60px repeat,
+      ${({ $v }) => $v === "dark" ? MOON_SM_D : MOON_SM_L} 40px 32px / 60px 48px repeat;
+    animation: ${driftMoons} 18s ease-in-out infinite alternate;
   }
 `;

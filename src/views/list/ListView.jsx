@@ -6,6 +6,7 @@ import {
   EmptyStateMessage,
   ListContainer,
   ListPanel,
+  ServerActivePatternOverlay,
   ServerDragPlaceholder,
   ServerEditButton,
   ServerRowContainer,
@@ -54,6 +55,7 @@ function ServerRow({
   const activeColor = String(server.selectionColor || DEFAULT_SELECTION_COLOR).trim().toUpperCase();
   const activeTextColor = getContrastingTextColor(activeColor);
   const activeMetaColor = activeTextColor === "#ffffff" ? "rgba(255,255,255,0.82)" : "rgba(26,37,48,0.82)";
+  const activePatternVariant = activeTextColor === "#ffffff" ? "light" : "dark";
 
   return (
     <ServerRowContainer>
@@ -70,6 +72,7 @@ function ServerRow({
         }}
         onDragEnd={onDragEnd}
       >
+        {isActive ? <ServerActivePatternOverlay $v={activePatternVariant} /> : null}
         <ServerMainButton
           type="button"
           $isActive={isActive}
