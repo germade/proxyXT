@@ -28,26 +28,40 @@ export const ServerList = styled.ul`
   gap: 8px;
 `;
 
-export const ServerListItem = styled.li`
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: stretch;
-  gap: 0;
-  animation: ${cardEnter} 220ms ease both;
-  cursor: grab;
-  user-select: none;
-
-  ${({ $isDragging }) =>
-    $isDragging &&
-    css`
-      opacity: 0.55;
-    `}
+export const ServerRowContainer = styled.li`
+  position: relative;
+  min-height: 48px;
+  list-style: none;
 
   ${({ $isDropTarget }) =>
     $isDropTarget &&
     css`
       transform: translateY(-1px);
     `}
+`;
+
+export const ServerListItem = styled.div`
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: stretch;
+  gap: 0;
+  min-height: 48px;
+  animation: ${cardEnter} 220ms ease both;
+  cursor: ${({ $isDragging }) => ($isDragging ? "grabbing" : "grab")};
+  user-select: none;
+`;
+
+export const ServerDragPlaceholder = styled.div`
+  position: absolute;
+  inset: 0;
+  border: 1px dashed #8fb0d9;
+  border-radius: 11px;
+  background: rgba(203, 220, 244, 0.8);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+  pointer-events: none;
+  opacity: ${({ $isVisible }) => ($isVisible ? 1 : 0)};
+  transition: opacity 120ms ease;
 `;
 
 export const ServerMainButton = styled.button`

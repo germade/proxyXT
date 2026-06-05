@@ -6,7 +6,9 @@ import {
   EmptyStateMessage,
   ListContainer,
   ListPanel,
+  ServerDragPlaceholder,
   ServerEditButton,
+  ServerRowContainer,
   ServerListItem,
   ServerList,
   ServerMainButton,
@@ -36,39 +38,41 @@ function ServerRow({
   const activeColor = String(server.selectionColor || DEFAULT_SELECTION_COLOR).trim().toUpperCase();
 
   return (
-    <ServerListItem
-      draggable={true}
-      $isDragging={isDragging}
-      $isDropTarget={isDropTarget}
-      onDragStart={(event) => onDragStart(event, server.id)}
-      onDragOver={(event) => onDragOver(event, server.id)}
-      onDrop={(event) => {
-        event.stopPropagation();
-        onDrop(event, server.id);
-      }}
-      onDragEnd={onDragEnd}
-    >
-      <ServerMainButton
-        type="button"
-        $isActive={isActive}
-        $activeColor={activeColor}
-        $noMeta={!hasMeta}
-        onClick={() => onToggle(server)}
+    <ServerRowContainer $isDropTarget={isDropTarget}>
+      <ServerListItem
+        draggable={true}
+        $isDragging={isDragging}
+        onDragStart={(event) => onDragStart(event, server.id)}
+        onDragOver={(event) => onDragOver(event, server.id)}
+        onDrop={(event) => {
+          event.stopPropagation();
+          onDrop(event, server.id);
+        }}
+        onDragEnd={onDragEnd}
       >
-        <ServerName $isActive={isActive}>{alias || `${server.host}:${server.port}`}</ServerName>
-        {hasMeta ? <ServerMeta $isActive={isActive}>{endpoint}</ServerMeta> : null}
-      </ServerMainButton>
-      <ServerEditButton
-        type="button"
-        $isActive={isActive}
-        $activeColor={activeColor}
-        title={t("buttons.server.edit")}
-        aria-label={`${t("buttons.server.edit")} ${getServerDisplayName(server)}`}
-        onClick={() => onEdit(server)}
-      >
-        ✎
-      </ServerEditButton>
-    </ServerListItem>
+        <ServerMainButton
+          type="button"
+          $isActive={isActive}
+          $activeColor={activeColor}
+          $noMeta={!hasMeta}
+          onClick={() => onToggle(server)}
+        >
+          <ServerName $isActive={isActive}>{alias || `${server.host}:${server.port}`}</ServerName>
+          {hasMeta ? <ServerMeta $isActive={isActive}>{endpoint}</ServerMeta> : null}
+        </ServerMainButton>
+        <ServerEditButton
+          type="button"
+          $isActive={isActive}
+          $activeColor={activeColor}
+          title={t("buttons.server.edit")}
+          aria-label={`${t("buttons.server.edit")} ${getServerDisplayName(server)}`}
+          onClick={() => onEdit(server)}
+        >
+          ✎
+        </ServerEditButton>
+      </ServerListItem>
+      <ServerDragPlaceholder $isVisible={isDragging} aria-hidden="true" />
+    </ServerRowContainer>
   );
 }
 

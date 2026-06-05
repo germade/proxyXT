@@ -110,6 +110,12 @@ export function FormView({
     setFormData((current) => ({ ...current, selectionColor: normalized }));
   }
 
+  function closeNativeColorPicker(inputElement) {
+    if (inputElement && typeof inputElement.blur === "function") {
+      inputElement.blur();
+    }
+  }
+
   function handleOpenAddColorPicker() {
     addCustomColorInputRef.current?.click();
   }
@@ -186,7 +192,10 @@ export function FormView({
                         }}
                         type="color"
                         value={customColor}
-                        onInput={(event) => handleCustomColorInput(index, event.currentTarget.value)}
+                        onChange={(event) => {
+                          handleCustomColorInput(index, event.currentTarget.value);
+                          closeNativeColorPicker(event.currentTarget);
+                        }}
                       />
                     </UserColorButton>
                   );
@@ -206,7 +215,10 @@ export function FormView({
                     ref={addCustomColorInputRef}
                     type="color"
                     value={formData.selectionColor}
-                    onInput={(event) => handleCustomColorInput(-1, event.currentTarget.value)}
+                    onChange={(event) => {
+                      handleCustomColorInput(-1, event.currentTarget.value);
+                      closeNativeColorPicker(event.currentTarget);
+                    }}
                   />
                 </UserColorButton>
               </ColorPresetRow>
