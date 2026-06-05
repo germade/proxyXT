@@ -58,6 +58,15 @@ const sadFaceDriftDown = keyframes`
   }
 `;
 
+const sadFaceFadeOut = keyframes`
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.82;
+  }
+`;
+
 export const LogsPanel = styled.section`
   display: flex;
   flex-direction: column;
@@ -256,7 +265,9 @@ export const EmptyLogsSadFaceMotion = styled.div`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  animation: ${sadFaceDriftDown} 4s ease-out forwards;
+  animation:
+    ${sadFaceDriftDown} 4s ease-out forwards,
+    ${sadFaceFadeOut} 4s ease-out forwards;
 `;
 
 export const EmptyLogsSadFace = styled.div`

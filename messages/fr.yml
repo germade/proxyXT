@@ -38,6 +38,7 @@ labels:
   scheme: Schema
   port: Port
   host: Hote/IP
+  selectionColor: Couleur du proxy selectionne
   bypassList: Bypass (separe par des virgules)
   alias: Alias (optionnel)
   autoFailover: Basculement automatique (round-robin)

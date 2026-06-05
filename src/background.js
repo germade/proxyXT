@@ -5,6 +5,7 @@ const SYNC_SERVERS_KEY = "proxyxt-sync-servers";
 const LOGS_KEY = "proxyxt-logs";
 const MAX_LOGS = 200;
 const FAILOVER_COOLDOWN_MS = 5000;
+const DEFAULT_SELECTION_COLOR = "#FF5400";
 const CONNECTIVITY_CHECK_COOLDOWN_MS = 4000;
 const CONNECTIVITY_CHECK_TIMEOUT_MS = 3500;
 const CONNECTIVITY_CHECK_URL = "https://clients3.google.com/generate_204";
@@ -368,13 +369,15 @@ async function applyActiveProxy(state) {
 }
 
 function sanitizeServer(rawServer) {
+  const selectionColor = String(rawServer.selectionColor || DEFAULT_SELECTION_COLOR).trim().toUpperCase();
   const server = {
     id: rawServer.id || generateId(),
     name: String(rawServer.name || "").trim(),
     scheme: String(rawServer.scheme || "http").trim().toLowerCase(),
     host: String(rawServer.host || "").trim(),
     port: String(rawServer.port || "").trim(),
-    bypassList: String(rawServer.bypassList || "").trim()
+    bypassList: String(rawServer.bypassList || "").trim(),
+    selectionColor: /^#([0-9A-F]{3}|[0-9A-F]{6})$/.test(selectionColor) ? selectionColor : DEFAULT_SELECTION_COLOR
   };
 
   if (!server.host || !server.port) {
@@ -499,6 +502,40 @@ async function handleSaveServer(payload) {
     server: summarizeServer(incoming),
     totalServers: state.servers.length,
     activeServerId: state.activeServerId
+  });
+  return state;
+}
+
+async function handleReorderServers(payload) {
+  const state = await loadState();
+  const orderedServerIds = Array.isArray(payload?.serverIds) ? payload.serverIds : [];
+  if (!orderedServerIds.length) {
+    return state;
+  }
+
+  const serverMap = new Map(state.servers.map((server) => [server.id, server]));
+  const reorderedServers = [];
+
+  for (const serverId of orderedServerIds) {
+    const server = serverMap.get(serverId);
+    if (server) {
+      reorderedServers.push(server);
+      serverMap.delete(serverId);
+    }
+  }
+
+  for (const server of state.servers) {
+    if (serverMap.has(server.id)) {
+      reorderedServers.push(server);
+      serverMap.delete(server.id);
+    }
+  }
+
+  state.servers = reorderedServers;
+  await saveState(state);
+  await pushServersToSyncIfEnabled(state);
+  await addLog("debug", "Estado actualizado tras reordenar servidores", {
+    totalServers: state.servers.length
   });
   return state;
 }
@@ -868,6 +905,11 @@ api.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     if (actionType === "proxyxt/deleteServer") {
       const state = await handleDeleteServer(message.payload || {});
       await addLog("info", "Servidor eliminado", getLogContext(message.payload));
+      return { state };
+    }
+
+    if (actionType === "proxyxt/reorderServers") {
+      const state = await handleReorderServers(message.payload || {});
       return { state };
     }
 

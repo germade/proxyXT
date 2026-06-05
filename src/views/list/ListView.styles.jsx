@@ -1,4 +1,4 @@
-import styled, { keyframes } from "styled-components";
+import styled, { css, keyframes } from "styled-components";
 
 const cardEnter = keyframes`
   from {
@@ -34,12 +34,26 @@ export const ServerListItem = styled.li`
   align-items: stretch;
   gap: 0;
   animation: ${cardEnter} 220ms ease both;
+  cursor: grab;
+  user-select: none;
+
+  ${({ $isDragging }) =>
+    $isDragging &&
+    css`
+      opacity: 0.55;
+    `}
+
+  ${({ $isDropTarget }) =>
+    $isDropTarget &&
+    css`
+      transform: translateY(-1px);
+    `}
 `;
 
 export const ServerMainButton = styled.button`
   flex: 1;
   border: none;
-  background: ${({ $isActive }) => ($isActive ? "rgb(255,84,0)" : "var(--surface)")};
+  background: ${({ $isActive, $activeColor }) => ($isActive ? $activeColor : "var(--surface)")};
   color: inherit;
   padding: 8px 16px;
   border-radius: 11px 0 0 11px;
@@ -54,11 +68,11 @@ export const ServerMainButton = styled.button`
   cursor: pointer;
 
   &:hover {
-    background: ${({ $isActive }) => ($isActive ? "rgb(255,84,0)" : "#f4f8ff")};
+    background: ${({ $isActive, $activeColor }) => ($isActive ? $activeColor : "#f4f8ff")};
   }
 
   &:active {
-    background: ${({ $isActive }) => ($isActive ? "rgb(255,84,0)" : "#eaf1fb")};
+    background: ${({ $isActive, $activeColor }) => ($isActive ? $activeColor : "#eaf1fb")};
   }
 `;
 
@@ -81,7 +95,7 @@ export const ServerEditButton = styled.button`
   min-width: 35px;
   border: none;
   border-radius: 0 11px 11px 0;
-  background: ${({ $isActive }) => ($isActive ? "#ffd8c2" : "#ffffff")};
+  background: ${({ $isActive, $activeColor }) => ($isActive ? $activeColor : "#ffffff")};
   color: ${({ $isActive }) => ($isActive ? "#1a2530" : "#4f6785")};
   font-size: 1rem;
   line-height: 1;
@@ -92,7 +106,7 @@ export const ServerEditButton = styled.button`
   cursor: pointer;
 
   &:hover {
-    background: ${({ $isActive }) => ($isActive ? "#ffd8c2" : "#234a75")};
+    background: ${({ $isActive, $activeColor }) => ($isActive ? $activeColor : "#234a75")};
     color: ${({ $isActive }) => ($isActive ? "#1a2530" : "#ffffff")};
     filter: none;
   }

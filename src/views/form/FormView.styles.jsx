@@ -32,6 +32,13 @@ export const FormRow = styled.div`
   grid-template-columns: 1fr 1fr;
 `;
 
+export const HostColorRow = styled.div`
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 48px minmax(0, 1fr);
+  align-items: end;
+`;
+
 export const Actions = styled.div`
   display: flex;
   gap: 8px;

@@ -24,9 +24,11 @@ const LabelText = styled.span`
 
 const Control = styled.select`
   width: 100%;
+  height: 48px;
+  box-sizing: border-box;
   border: none;
   border-radius: 8px;
-  padding: 24px 8px 8px;
+  padding: 18px 8px 6px;
   font-size: 0.9rem;
   font-weight: 500;
   color: #1f3046;

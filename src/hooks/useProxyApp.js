@@ -175,7 +175,8 @@ export function useProxyApp() {
       scheme: server.scheme,
       host: server.host,
       port: server.port,
-      bypassList: server.bypassList || ""
+      bypassList: server.bypassList || "",
+      selectionColor: server.selectionColor || initialFormState.selectionColor
     });
     setView("form");
     clearFeedback();
@@ -220,7 +221,8 @@ export function useProxyApp() {
         scheme: formData.scheme,
         host: formData.host,
         port: formData.port,
-        bypassList: formData.bypassList
+        bypassList: formData.bypassList,
+        selectionColor: formData.selectionColor || initialFormState.selectionColor
       }
     };
 
@@ -244,6 +246,46 @@ export function useProxyApp() {
       setFeedback({ message: t("messages.serverDeleted"), isError: false });
       closeForm();
     } catch (error) {
+      setFeedback({ message: error.message, isError: true });
+    }
+  }
+
+  async function handleReorderServers(sourceServerId, targetServerId) {
+    const previousServers = state.servers;
+    const sourceIndex = previousServers.findIndex((server) => server.id === sourceServerId);
+    if (sourceIndex < 0) {
+      return;
+    }
+
+    const nextServers = previousServers.slice();
+    const [movedServer] = nextServers.splice(sourceIndex, 1);
+    if (!movedServer) {
+      return;
+    }
+
+    if (!targetServerId) {
+      nextServers.push(movedServer);
+    } else {
+      const targetIndex = nextServers.findIndex((server) => server.id === targetServerId);
+      if (targetIndex < 0) {
+        nextServers.push(movedServer);
+      } else {
+        nextServers.splice(targetIndex, 0, movedServer);
+      }
+    }
+
+    setState((current) => ({
+      ...current,
+      servers: nextServers
+    }));
+
+    try {
+      await callBackground("proxyxt/reorderServers", { serverIds: nextServers.map((server) => server.id) });
+    } catch (error) {
+      setState((current) => ({
+        ...current,
+        servers: previousServers
+      }));
       setFeedback({ message: error.message, isError: true });
     }
   }
@@ -498,6 +540,7 @@ export function useProxyApp() {
     openFormForEdit,
     handleSubmitForm,
     handleDeleteServer,
+    handleReorderServers,
     handleAutoFailoverChange,
     handleReloadActiveTabChange,
     handleSyncServersWithAccountChange,

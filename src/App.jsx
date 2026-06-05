@@ -40,6 +40,7 @@ export function App() {
     handleLogsFeedback,
     handleToggleServer,
     openFormForEdit,
+    handleReorderServers,
     handleSubmitForm,
     handleDeleteServer,
     handleAutoFailoverChange,
@@ -77,6 +78,7 @@ export function App() {
           servers={servers}
           activeServerId={activeServerId}
           handleToggleServer={handleToggleServer}
+          handleReorderServers={handleReorderServers}
           openFormForEdit={openFormForEdit}
           formMode={formMode}
           formData={formData}

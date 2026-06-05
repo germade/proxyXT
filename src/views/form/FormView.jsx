@@ -1,4 +1,5 @@
 import { h } from "preact";
+import { ColorField } from "../../components/form/ColorField.jsx";
 import { InputField } from "../../components/form/InputField.jsx";
 import { SelectField } from "../../components/form/SelectField.jsx";
 import {
@@ -6,6 +7,7 @@ import {
   DeleteButton,
   FormPanel,
   FormRow,
+  HostColorRow,
   ProxyForm,
   SubmitButton
 } from "./FormView.styles.jsx";
@@ -47,14 +49,23 @@ export function FormView({
           />
         </FormRow>
 
-        <InputField
-          label={t("labels.host")}
-          id="host"
-          type="text"
-          value={formData.host}
-          required={true}
-          onInput={(value) => setFormData((current) => ({ ...current, host: value }))}
-        />
+        <HostColorRow>
+          <ColorField
+            label={t("labels.selectionColor")}
+            id="selectionColor"
+            value={formData.selectionColor}
+            onChange={(value) => setFormData((current) => ({ ...current, selectionColor: value }))}
+          />
+
+          <InputField
+            label={t("labels.host")}
+            id="host"
+            type="text"
+            value={formData.host}
+            required={true}
+            onInput={(value) => setFormData((current) => ({ ...current, host: value }))}
+          />
+        </HostColorRow>
 
         <InputField
           label={t("labels.alias")}

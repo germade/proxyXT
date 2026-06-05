@@ -20,6 +20,7 @@ export function AppMain({
   servers,
   activeServerId,
   handleToggleServer,
+  handleReorderServers,
   openFormForEdit,
   formMode,
   formData,
@@ -53,6 +54,7 @@ export function AppMain({
         servers={servers}
         activeServerId={activeServerId}
         onToggle={handleToggleServer}
+        onReorder={handleReorderServers}
         onEdit={openFormForEdit}
         getServerDisplayName={getServerDisplayName}
         onAddServer={handlePrimaryAction}
