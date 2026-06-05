@@ -17,7 +17,6 @@ import {
   ConfirmText,
   EmptyLogsIllustration,
   EmptyLogsSadFace,
-  EmptyLogsSadFaceOutline,
   EmptyLogsSadEyeLeft,
   EmptyLogsSadEyeRight,
   EmptyLogsSadNose,
@@ -381,7 +380,6 @@ export function LogsView({ t, logs, onClose, onClearLogs, onFeedback }) {
               >
                 {isSadEasterEggActive ? (
                   <EmptyLogsSadFace>
-                    <EmptyLogsSadFaceOutline />
                     <EmptyLogsSadEyeLeft />
                     <EmptyLogsSadEyeRight />
                     <EmptyLogsSadNose />

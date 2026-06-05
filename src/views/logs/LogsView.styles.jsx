@@ -251,9 +251,9 @@ export const EmptyLogsSadFace = styled.div`
 
 export const EmptyLogsSadEye = styled.span`
   position: absolute;
-  top: 14px;
-  width: 6px;
-  height: 6px;
+  top: 13px;
+  width: 7px;
+  height: 7px;
   border-radius: 999px;
   background: currentColor;
   animation: ${sadFaceDrop} 3s ease-out forwards;
@@ -270,22 +270,13 @@ export const EmptyLogsSadEyeRight = styled(EmptyLogsSadEye)`
 export const EmptyLogsSadNose = styled.span`
   position: absolute;
   left: 50%;
-  top: 22px;
-  width: 6px;
-  height: 12px;
+  top: 21px;
+  width: 7px;
+  height: 14px;
   border-radius: 999px;
   background: currentColor;
   transform: translateX(-50%);
   animation: ${sadFaceDrop} 3s ease-out forwards;
-`;
-
-export const EmptyLogsSadFaceOutline = styled.span`
-  position: absolute;
-  inset: 0;
-  border-radius: 999px;
-  border: 1.5px solid currentColor;
-  opacity: 0.85;
-  transform: scale(0.98);
 `;
 
 export const ConfirmOverlay = styled.div`
