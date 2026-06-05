@@ -1,31 +1,11 @@
 import { Fragment, h } from "preact";
 import { useRef } from "preact/hooks";
-import { AddBackButton } from "./components/AddBackButton.jsx";
-import { LanguageBadge } from "./components/LanguageBadge.jsx";
-import { LogsSvg } from "./components/icons/LogsSvg.jsx";
-import { PreferencesSvg } from "./components/icons/PreferencesSvg.jsx";
 import { useProxyApp } from "./hooks/useProxyApp.js";
-import { getServerDisplayName } from "./lib/state.js";
 import { LogsView } from "./views/logs/LogsView.jsx";
-import { ListView } from "./views/list/ListView.jsx";
-import { FormView } from "./views/form/FormView.jsx";
-import { PreferencesView } from "./views/preferences/PreferencesView.jsx";
-import {
-  ActiveFooter,
-  AppFooter,
-  AppHeader,
-  AppMain,
-  AppTitle,
-  ContentStack,
-  FooterActions,
-  FooterProxyLabel,
-  FooterProxyStatus,
-  FooterProxyValue,
-  HeaderActions,
-  HeaderHome,
-  HeaderSubtitle,
-  LogsLayer
-} from "./App.styles.jsx";
+import { AppFooter } from "./layout/footer/AppFooter.jsx";
+import { AppMain } from "./layout/main/AppMain.jsx";
+import { ContentStack } from "./layout/main/ContentStack.jsx";
+import { LogsLayer } from "./layout/main/LogsLayer.jsx";
 
 export function App() {
   const mainRef = useRef(null);
@@ -70,120 +50,58 @@ export function App() {
   return (
     <Fragment>
       <ContentStack style={stackedStyle}>
-        <LogsLayer $isVisible={view === "logs"}>
+        <LogsLayer isVisible={view === "logs"}>
           <LogsView t={t} logs={logs} />
         </LogsLayer>
 
-        <AppMain ref={mainRef} className="app-main" $isHidden={view === "logs"}>
-          <AppHeader>
-            <HeaderHome
-              role="button"
-              tabIndex={0}
-              onClick={handleOpenList}
-              onKeyDown={(event) => {
-                if (event.key === "Enter" || event.key === " ") {
-                  event.preventDefault();
-                  handleOpenList();
-                }
-              }}
-            >
-              <AppTitle>{t("app.title")}</AppTitle>
-              <HeaderSubtitle id="headerSubtitle">{subtitle}</HeaderSubtitle>
-            </HeaderHome>
-            <HeaderActions>
-              <AddBackButton
-                variant="icon"
-                slot="header"
-                active={view === "preferences"}
-                ariaLabel={view === "preferences" ? t("buttons.preferences.hide") : t("buttons.preferences.show")}
-                title={t("preferences.title")}
-                onClick={handleTogglePreferences}
-              >
-                <PreferencesSvg />
-              </AddBackButton>
-
-              <AddBackButton
-                variant="plusToggle"
-                view={view === "form" ? "form" : "list"}
-                onClick={handlePrimaryAction}
-                ariaLabel={view === "form" ? t("buttons.server.backToList") : t("buttons.server.add")}
-              />
-            </HeaderActions>
-          </AppHeader>
-
-          <ListView
-            t={t}
-            view={view}
-            servers={servers}
-            activeServerId={activeServerId}
-            onToggle={handleToggleServer}
-            onEdit={openFormForEdit}
-            getServerDisplayName={getServerDisplayName}
-          />
-
-          <FormView
-            t={t}
-            view={view}
-            formMode={formMode}
-            formData={formData}
-            setFormData={setFormData}
-            onSubmit={handleSubmitForm}
-            onDelete={handleDeleteServer}
-          />
-
-          <PreferencesView
-            t={t}
-            view={view}
-            autoFailoverEnabled={autoFailoverEnabled}
-            reloadActiveTabOnToggle={reloadActiveTabOnToggle}
-            syncServersWithAccount={syncServersWithAccount}
-            language={languagePreference}
-            onAutoFailoverChange={handleAutoFailoverChange}
-            onReloadActiveTabChange={handleReloadActiveTabChange}
-            onSyncServersWithAccountChange={handleSyncServersWithAccountChange}
-            onLanguageChange={handleLanguageChange}
-          />
-        </AppMain>
+        <AppMain
+          mainRef={mainRef}
+          className="app-main"
+          isHidden={view === "logs"}
+          t={t}
+          subtitle={subtitle}
+          view={view}
+          handleOpenList={handleOpenList}
+          handleTogglePreferences={handleTogglePreferences}
+          handlePrimaryAction={handlePrimaryAction}
+          servers={servers}
+          activeServerId={activeServerId}
+          handleToggleServer={handleToggleServer}
+          openFormForEdit={openFormForEdit}
+          formMode={formMode}
+          formData={formData}
+          setFormData={setFormData}
+          handleSubmitForm={handleSubmitForm}
+          handleDeleteServer={handleDeleteServer}
+          autoFailoverEnabled={autoFailoverEnabled}
+          reloadActiveTabOnToggle={reloadActiveTabOnToggle}
+          syncServersWithAccount={syncServersWithAccount}
+          languagePreference={languagePreference}
+          handleAutoFailoverChange={handleAutoFailoverChange}
+          handleReloadActiveTabChange={handleReloadActiveTabChange}
+          handleSyncServersWithAccountChange={handleSyncServersWithAccountChange}
+          handleLanguageChange={handleLanguageChange}
+        />
       </ContentStack>
 
-      <AppFooter $isHidden={view === "form"}>
-        <div>
-        {footerFeedbackMessage ? (
-          <ActiveFooter id="activeFooter" style={footerFeedbackStyle}>
-            {footerFeedbackMessage}
-          </ActiveFooter>
-        ) : (
-          <FooterProxyStatus id="activeFooter" onClick={handleOpenList}>
-            <FooterProxyLabel>{t("footer.proxyLabel")}</FooterProxyLabel>
-            <FooterProxyValue $isActive={Boolean(activeServerId)}> {activeProxyDisplay}</FooterProxyValue>
-          </FooterProxyStatus>
-        )}
-        </div>
-
-        <FooterActions>
-          <LanguageBadge
-            preference={languagePreference}
-            effectiveLanguage={effectiveLanguage}
-            t={t}
-            onClick={handleOpenPreferences}
-          />
-
-          <AddBackButton
-            variant="icon"
-            slot="footer"
-            active={view === "logs"}
-            hasError={hasErrorLogs}
-            ariaLabel={view === "logs" ? t("buttons.logs.hide") : t("buttons.logs.show")}
-            title={t("buttons.logs.title")}
-            onClick={() => {
-              const height = mainRef.current?.offsetHeight || 0;
-              handleToggleLogs(height);
-            }}
-          >
-            <LogsSvg />
-          </AddBackButton>
-        </FooterActions>
-      </AppFooter>
+      <AppFooter
+        isHidden={view === "form"}
+        footerFeedbackMessage={footerFeedbackMessage}
+        footerFeedbackStyle={footerFeedbackStyle}
+        handleOpenList={handleOpenList}
+        t={t}
+        activeServerId={activeServerId}
+        activeProxyDisplay={activeProxyDisplay}
+        languagePreference={languagePreference}
+        effectiveLanguage={effectiveLanguage}
+        handleOpenPreferences={handleOpenPreferences}
+        view={view}
+        hasErrorLogs={hasErrorLogs}
+        onToggleLogs={() => {
+          const height = mainRef.current?.offsetHeight || 0;
+          handleToggleLogs(height);
+        }}
+      />
     </Fragment>
   );
 }

@@ -2,11 +2,11 @@ import styled, { css } from "styled-components";
 
 export const StyledLanguageBadge = styled.button`
   border: none;
+  background: transparent;
   display: inline-flex;
   align-items: center;
   gap: 5px;
   padding: 2px 6px 2px 3px;
-  border-radius: 999px;
   color: #3a4f69;
   font-size: 0.67rem;
   font-weight: 700;
@@ -16,10 +16,6 @@ export const StyledLanguageBadge = styled.button`
     $isClickable &&
     css`
       cursor: pointer;
-
-      &:hover {
-        background: #dbe6f6;
-      }
     `}
 
   &:disabled {
