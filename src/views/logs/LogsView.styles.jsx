@@ -80,7 +80,40 @@ export const LogsContent = styled.div`
 export const LogEntryContainer = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 2px;
+  padding: 6px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: ${({ $level }) => {
+    switch ($level) {
+      case "success":
+        return "#e8f8ef";
+      case "warning":
+        return "#fff3e0";
+      case "error":
+        return "#fdecea";
+      case "debug":
+        return "#f3e8ff";
+      case "info":
+      default:
+        return "#e8f1ff";
+    }
+  }};
+  border-color: ${({ $level }) => {
+    switch ($level) {
+      case "success":
+        return "#b6e2c6";
+      case "warning":
+        return "#ffd39a";
+      case "error":
+        return "#f6b6b1";
+      case "debug":
+        return "#d6b7ff";
+      case "info":
+      default:
+        return "#bfd7ff";
+    }
+  }};
 `;
 
 export const LogTime = styled.span`
@@ -101,7 +134,7 @@ export const LogMain = styled.span`
 export const LogContext = styled.pre`
   margin: 2px 0 0;
   padding: 4px 6px;
-  background: #f4f8ff;
+  background: rgba(255, 255, 255, 0.52);
   border-radius: 0 4px 4px 0;
   font-size: 0.68rem;
   line-height: 1.45;

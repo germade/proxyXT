@@ -57,13 +57,14 @@ function toYaml(value, indent = 0) {
 }
 
 function LogEntry({ log, t }) {
-  const level = String(log.level || "info").toUpperCase();
+  const normalizedLevel = String(log.level || "info").toLowerCase();
+  const level = normalizedLevel.toUpperCase();
   const message = String(log.message || t("messages.noMessage"));
   const rawTime = log.time ? new Date(log.time) : null;
   const time = rawTime && !Number.isNaN(rawTime.getTime()) ? rawTime.toLocaleString() : String(log.time || "");
 
   return (
-    <LogEntryContainer>
+    <LogEntryContainer $level={normalizedLevel}>
       <LogTime>{time}</LogTime>
       <LogMain>{`${level}: ${message}`}</LogMain>
       {log.context ? <LogContext>{toYaml(log.context, 0)}</LogContext> : null}
