@@ -5,6 +5,19 @@ const Wrapper = styled.label`
   display: flex;
   align-items: center;
   gap: 10px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  background: transparent;
+  transition: background 120ms ease;
+  
+  &:hover {
+    background: #f4f8ff;
+  }
+
+  &:active {
+    background: #eaf1fb;
+  }
 `;
 
 const Control = styled.input`

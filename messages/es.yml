@@ -46,6 +46,10 @@ labels:
   reloadActiveTabOnToggle: Recargar pestana activa al activar/desactivar un servidor
   syncServersWithAccount: Sincronizar servidores con la cuenta del navegador
   showFailoverNotifications: Mostrar notificaciones al cambiar de servidor por failover
+  syncData: Sincronizar datos
+  autoFailoverSimple: Failover automatico
+  autoReloadTab: Auto recargar pestana
+  showNotifications: Mostrar notificaciones
   language: Idioma
 
 language:

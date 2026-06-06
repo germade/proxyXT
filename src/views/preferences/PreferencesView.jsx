@@ -1,10 +1,12 @@
 import { h } from "preact";
+import { useMemo, useState } from "preact/hooks";
 import { SelectField } from "../../components/form/SelectField.jsx";
 import {
   PreferenceToggle,
   PreferencesCard,
   PreferencesGroup,
-  PreferencesHelp,
+  PreferencesHintBox,
+  PreferencesHintText,
   PreferencesPanel,
   PreferencesSeparator
 } from "./PreferencesView.styles.jsx";
@@ -34,6 +36,24 @@ export function PreferencesView({
   onShowFailoverNotificationsChange,
   onLanguageChange
 }) {
+  const [hoveredPreferenceId, setHoveredPreferenceId] = useState(null);
+  const preferenceHintById = useMemo(() => ({
+    syncServersWithAccount: t("preferences.syncHelp"),
+    autoFailoverEnabled: t("preferences.help"),
+    reloadActiveTabOnToggle: t("preferences.reloadHelp"),
+    showFailoverNotifications: t("preferences.failoverNotificationsHelp")
+  }), [t]);
+  const activeHint = hoveredPreferenceId ? preferenceHintById[hoveredPreferenceId] : "";
+
+  function preferenceHoverHandlers(id) {
+    return {
+      onMouseEnter: () => setHoveredPreferenceId(id),
+      onFocusIn: () => setHoveredPreferenceId(id),
+      onMouseLeave: () => setHoveredPreferenceId((current) => (current === id ? null : current)),
+      onFocusOut: () => setHoveredPreferenceId((current) => (current === id ? null : current))
+    };
+  }
+
   return (
     <PreferencesPanel $isVisible={view === "preferences"}>
       <PreferencesCard>
@@ -58,37 +78,45 @@ export function PreferencesView({
         <PreferencesSeparator aria-hidden="true" />
 
         <PreferencesGroup>
-          <PreferenceToggle
-            id="autoFailoverEnabled"
-            checked={Boolean(autoFailoverEnabled)}
-            onChange={onAutoFailoverChange}
-            label={t("labels.autoFailover")}
-          />
-          <PreferencesHelp>{t("preferences.help")}</PreferencesHelp>
+          <div {...preferenceHoverHandlers("syncServersWithAccount")}>
+            <PreferenceToggle
+              id="syncServersWithAccount"
+              checked={Boolean(syncServersWithAccount)}
+              onChange={onSyncServersWithAccountChange}
+              label={t("labels.syncData")}
+            />
+          </div>
 
-          <PreferenceToggle
-            id="reloadActiveTabOnToggle"
-            checked={Boolean(reloadActiveTabOnToggle)}
-            onChange={onReloadActiveTabChange}
-            label={t("labels.reloadActiveTabOnToggle")}
-          />
-          <PreferencesHelp>{t("preferences.reloadHelp")}</PreferencesHelp>
+          <div {...preferenceHoverHandlers("autoFailoverEnabled")}>
+            <PreferenceToggle
+              id="autoFailoverEnabled"
+              checked={Boolean(autoFailoverEnabled)}
+              onChange={onAutoFailoverChange}
+              label={t("labels.autoFailoverSimple")}
+            />
+          </div>
 
-          <PreferenceToggle
-            id="syncServersWithAccount"
-            checked={Boolean(syncServersWithAccount)}
-            onChange={onSyncServersWithAccountChange}
-            label={t("labels.syncServersWithAccount")}
-          />
-          <PreferencesHelp>{t("preferences.syncHelp")}</PreferencesHelp>
+          <div {...preferenceHoverHandlers("reloadActiveTabOnToggle")}>
+            <PreferenceToggle
+              id="reloadActiveTabOnToggle"
+              checked={Boolean(reloadActiveTabOnToggle)}
+              onChange={onReloadActiveTabChange}
+              label={t("labels.autoReloadTab")}
+            />
+          </div>
 
-          <PreferenceToggle
-            id="showFailoverNotifications"
-            checked={Boolean(showFailoverNotifications)}
-            onChange={onShowFailoverNotificationsChange}
-            label={t("labels.showFailoverNotifications")}
-          />
-          <PreferencesHelp>{t("preferences.failoverNotificationsHelp")}</PreferencesHelp>
+          <div {...preferenceHoverHandlers("showFailoverNotifications")}>
+            <PreferenceToggle
+              id="showFailoverNotifications"
+              checked={Boolean(showFailoverNotifications)}
+              onChange={onShowFailoverNotificationsChange}
+              label={t("labels.showNotifications")}
+            />
+          </div>
+
+          <PreferencesHintBox aria-live="polite">
+            <PreferencesHintText>{activeHint || " "}</PreferencesHintText>
+          </PreferencesHintBox>
         </PreferencesGroup>
       </PreferencesCard>
     </PreferencesPanel>

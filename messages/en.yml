@@ -46,6 +46,10 @@ labels:
   reloadActiveTabOnToggle: Reload active tab when enabling/disabling a server
   syncServersWithAccount: Sync servers with browser account
   showFailoverNotifications: Show notifications when server changes by failover
+  syncData: Sync data
+  autoFailoverSimple: Automatic failover
+  autoReloadTab: Auto reload tab
+  showNotifications: Show notifications
   language: Language
 
 language:
