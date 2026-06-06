@@ -23,6 +23,9 @@ const LabelText = styled.span`
 `;
 
 const Control = styled.input`
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-end;
   width: 100%;
   height: 48px;
   box-sizing: border-box;

@@ -49,7 +49,8 @@ export const HostColorRow = styled.div`
 
 export const ColorPresetPanel = styled.div`
   display: grid;
-  grid-template-rows: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, 18px);
+  align-content: center;
   gap: 4px;
   height: 48px;
   box-sizing: border-box;
@@ -64,6 +65,7 @@ export const ColorPresetRow = styled.div`
   grid-auto-flow: column;
   grid-auto-columns: 18px;
   gap: 4px;
+  min-height: 18px;
   align-items: center;
   overflow: hidden;
 `;
@@ -72,6 +74,7 @@ export const UserColorRow = styled.div`
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 4px;
+  min-height: 18px;
   align-items: center;
 `;
 
@@ -80,6 +83,7 @@ export const UserColorActions = styled.div`
   grid-auto-flow: column;
   grid-auto-columns: 18px;
   gap: 4px;
+  min-height: 18px;
   align-items: center;
 `;
 
@@ -88,6 +92,7 @@ export const UserColorList = styled.div`
   grid-auto-flow: column;
   grid-auto-columns: 18px;
   gap: 4px;
+  min-height: 18px;
   align-items: center;
   overflow: hidden;
 `;
@@ -103,11 +108,13 @@ export const ColorPresetButton = styled.button`
   box-shadow: none;
   cursor: pointer;
   appearance: none;
-  transition: transform 120ms ease, filter 120ms ease, opacity 120ms ease;
+  outline: 1px solid transparent;
+  outline-offset: 1px;
+  transition: outline-color 120ms ease, filter 120ms ease, opacity 120ms ease, background 120ms ease;
 
   &:hover {
     filter: brightness(1.04);
-    transform: translateY(-1px);
+    outline-color: rgba(79, 121, 182, 0.7);
   }
 
   &:active {
@@ -151,7 +158,7 @@ export const UserColorButton = styled(ColorPresetButton)`
   &:hover {
     background: #d2def2;
     filter: none;
-    transform: translateY(-1px);
+    outline-color: rgba(79, 121, 182, 0.7);
     animation: none;
   }
 

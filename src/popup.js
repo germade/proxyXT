@@ -6,9 +6,8 @@ setup(h);
 
 const root = document.getElementById("appRoot");
 
-if (root && !globalThis.__proxyxtPopupMounted) {
-	// Defensive reset in case the same document is initialized more than once.
+if (root) {
+	// Make popup bootstrap idempotent if the same document initializes more than once.
 	root.replaceChildren();
 	render(h(App, null), root);
-	globalThis.__proxyxtPopupMounted = true;
 }

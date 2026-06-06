@@ -29,18 +29,18 @@ import {
 } from "./FormView.styles.jsx";
 
 const COLOR_PRESETS = [
-  "#ff5400",
-  "#0053ff",
-  "#00a676",
   "#e63946",
-  "#9b5de5",
-  "#f4a261",
-  "#2a9d8f",
+  "#ef476f",
   "#ff006e",
-  "#8338ec",
-  "#3a86ff",
+  "#ff5400",
+  "#f4a261",
   "#06d6a0",
-  "#ef476f"
+  "#00a676",
+  "#2a9d8f",
+  "#3a86ff",
+  "#0053ff",
+  "#8338ec",
+  "#9b5de5"
 ];
 
 const MAX_USER_COLORS = Math.max(1, COLOR_PRESETS.length - 1);
