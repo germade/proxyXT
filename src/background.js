@@ -1576,13 +1576,13 @@ if (api.permissions?.onAdded?.addListener) {
         }
       }
 
-      if (permissions.includes("tabs")) {
+      if (permissions.includes("activeTab")) {
         const tabsNotifyPending = await getTabsPermissionNotifyPending();
         if (!tabsNotifyPending) {
           return;
         }
 
-        await addLog("debug", "Permiso de pestanas concedido: enviando notificacion de confirmacion", {
+        await addLog("debug", "Permiso activeTab concedido: enviando notificacion de confirmacion", {
           permissions
         });
         await handleNotifyTabsPermissionEnabled();

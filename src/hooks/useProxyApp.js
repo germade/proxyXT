@@ -437,15 +437,15 @@ export function useProxyApp() {
 
     if (enabled) {
       try {
-        const hasTabsPermission = await containsPermissions(["tabs"]);
-        if (!hasTabsPermission) {
+        const hasActiveTabPermission = await containsPermissions(["activeTab"]);
+        if (!hasActiveTabPermission) {
           const hasNotificationsPermission = await containsPermissions(["notifications"]);
           shouldNotifyTabsPermissionGranted = hasNotificationsPermission;
           if (shouldNotifyTabsPermissionGranted) {
             await callBackground("proxyxt/setTabsPermissionNotifyPending", { pending: true });
           }
 
-          const granted = await requestPermissions(["tabs"]);
+          const granted = await requestPermissions(["activeTab"]);
           if (!granted) {
             if (shouldNotifyTabsPermissionGranted) {
               try {
