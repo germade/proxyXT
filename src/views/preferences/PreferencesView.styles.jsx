@@ -11,6 +11,16 @@ const slowGearSpin = keyframes`
   }
 `;
 
+const gearBoostSpin = keyframes`
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(1080deg);
+  }
+`;
+
 export const PreferencesPanel = styled.section`
   min-height: 192px;
   display: ${({ $isVisible }) => ($isVisible ? "block" : "none")};
@@ -54,6 +64,7 @@ export const PreferencesHintBox = styled.div`
   justify-content: flex-start;
   position: relative;
   overflow: hidden;
+  cursor: pointer;
 `;
 
 export const PreferencesHintText = styled.p`
@@ -77,4 +88,9 @@ export const PreferencesHintPlaceholder = styled.div`
   transform: translateY(-1px);
   animation: ${slowGearSpin} 18s linear infinite;
   pointer-events: none;
+
+  > svg {
+    animation: ${({ $isBoosted }) => ($isBoosted ? gearBoostSpin : "none")} 3s ease-in-out 1;
+    transform-origin: center;
+  }
 `;
