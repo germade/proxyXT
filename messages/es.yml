@@ -50,6 +50,9 @@ labels:
   autoFailoverSimple: Failover automatico
   autoReloadTab: Auto recargar pestana
   showNotifications: Mostrar notificaciones
+  permissionBadge: Requiere permiso
+  permissionBadgeTabsTitle: Requiere el permiso de pestanas para poder recargar automaticamente la pestana activa.
+  permissionBadgeNotificationsTitle: Requiere el permiso de notificaciones para avisar cuando hay cambio de servidor por failover.
   language: Idioma
 
 language:

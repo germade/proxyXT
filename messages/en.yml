@@ -50,6 +50,9 @@ labels:
   autoFailoverSimple: Automatic failover
   autoReloadTab: Auto reload tab
   showNotifications: Show notifications
+  permissionBadge: Requires permission
+  permissionBadgeTabsTitle: Requires tabs permission to automatically reload the active tab.
+  permissionBadgeNotificationsTitle: Requires notifications permission to alert when server changes by failover.
   language: Language
 
 language:

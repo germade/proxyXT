@@ -27,7 +27,26 @@ const Control = styled.input`
   accent-color: var(--brand-blue);
 `;
 
-export function CheckboxField({ id, checked, onChange, label, className }) {
+const LabelText = styled.span`
+  flex: 1 1 auto;
+  min-width: 0;
+`;
+
+const LabelBadge = styled.span`
+  flex: 0 0 auto;
+  margin-left: auto;
+  padding: 2px 6px;
+  border-radius: 999px;
+  font-size: 0.66rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  color: #415a78;
+  background: #dde9f9;
+  box-shadow: inset 0 0 0 1px #b5c8e4;
+`;
+
+export function CheckboxField({ id, checked, onChange, label, badge, badgeTitle, className }) {
   return (
     <Wrapper className={className}>
       <Control
@@ -36,7 +55,8 @@ export function CheckboxField({ id, checked, onChange, label, className }) {
         checked={checked}
         onChange={(event) => onChange(event.currentTarget.checked)}
       />
-      <span>{label}</span>
+      <LabelText>{label}</LabelText>
+      {badge ? <LabelBadge title={badgeTitle || badge}>{badge}</LabelBadge> : null}
     </Wrapper>
   );
 }

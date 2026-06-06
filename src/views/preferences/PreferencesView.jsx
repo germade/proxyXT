@@ -102,6 +102,8 @@ export function PreferencesView({
               checked={Boolean(reloadActiveTabOnToggle)}
               onChange={onReloadActiveTabChange}
               label={t("labels.autoReloadTab")}
+              badge={t("labels.permissionBadge")}
+              badgeTitle={t("labels.permissionBadgeTabsTitle")}
             />
           </div>
 
@@ -111,6 +113,8 @@ export function PreferencesView({
               checked={Boolean(showFailoverNotifications)}
               onChange={onShowFailoverNotificationsChange}
               label={t("labels.showNotifications")}
+              badge={t("labels.permissionBadge")}
+              badgeTitle={t("labels.permissionBadgeNotificationsTitle")}
             />
           </div>
 
