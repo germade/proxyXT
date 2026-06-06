@@ -834,6 +834,16 @@ async function updateActionIconForActiveServer(server) {
   await updateActionIcon(true);
 }
 
+async function refreshActionIconForState(state) {
+  const activeServer = state?.servers?.find((server) => server.id === state?.activeServerId) || null;
+  if (!activeServer) {
+    await updateActionIcon(false);
+    return;
+  }
+
+  await updateActionIconForActiveServer(activeServer);
+}
+
 function mapServerToProxyRules(server) {
   const port = Number.parseInt(server.port, 10);
   if (!server.host || Number.isNaN(port)) {
@@ -1047,6 +1057,8 @@ async function handleGetState() {
   const state = await loadState();
   const syncedState = await pullServersFromSyncIfEnabled(state);
 
+  await refreshActionIconForState(syncedState);
+
   if (syncedState.preferences?.autoFailoverEnabled && syncedState.activeServerId) {
     void probeProxyConnectivityAndFailoverIfNeeded();
   }
@@ -1076,6 +1088,7 @@ async function handleSaveServer(payload) {
 
   await saveState(state);
   await pushServersToSyncIfEnabled(state);
+  await refreshActionIconForState(state);
   await addLog("debug", "Estado actualizado tras guardar servidor", {
     server: summarizeServer(incoming),
     totalServers: state.servers.length,
