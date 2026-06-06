@@ -40,6 +40,9 @@ export const PreferencesHintBox = styled.div`
   box-shadow: inset 0 0 0 1px #c5d4e9;
   display: flex;
   align-items: flex-start;
+  justify-content: flex-start;
+  position: relative;
+  overflow: hidden;
 `;
 
 export const PreferencesHintText = styled.p`
@@ -48,4 +51,18 @@ export const PreferencesHintText = styled.p`
   color: #3d556e;
   line-height: 1.35;
   overflow: hidden;
+  position: relative;
+  z-index: 1;
+`;
+
+export const PreferencesHintPlaceholder = styled.div`
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #3d556e;
+  opacity: ${({ $isHintActive }) => ($isHintActive ? 0.025 : 0.05)};
+  transform: translateY(-1px);
+  pointer-events: none;
 `;

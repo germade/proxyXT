@@ -1,11 +1,13 @@
 import { h } from "preact";
 import { useMemo, useState } from "preact/hooks";
+import { PreferencesSvg } from "../../components/icons/PreferencesSvg.jsx";
 import { SelectField } from "../../components/form/SelectField.jsx";
 import {
   PreferenceToggle,
   PreferencesCard,
   PreferencesGroup,
   PreferencesHintBox,
+  PreferencesHintPlaceholder,
   PreferencesHintText,
   PreferencesPanel,
   PreferencesSeparator
@@ -119,6 +121,9 @@ export function PreferencesView({
           </div>
 
           <PreferencesHintBox aria-live="polite">
+            <PreferencesHintPlaceholder aria-hidden="true" $isHintActive={Boolean(activeHint)}>
+              <PreferencesSvg size={48} />
+            </PreferencesHintPlaceholder>
             <PreferencesHintText>{activeHint || " "}</PreferencesHintText>
           </PreferencesHintBox>
         </PreferencesGroup>
