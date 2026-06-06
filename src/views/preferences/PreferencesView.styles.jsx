@@ -1,5 +1,15 @@
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 import { CheckboxField } from "../../components/form/CheckboxField.jsx";
+
+const slowGearSpin = keyframes`
+  from {
+    transform: translateY(-1px) rotate(0deg);
+  }
+
+  to {
+    transform: translateY(-1px) rotate(360deg);
+  }
+`;
 
 export const PreferencesPanel = styled.section`
   min-height: 192px;
@@ -65,5 +75,6 @@ export const PreferencesHintPlaceholder = styled.div`
   color: #3d556e;
   opacity: ${({ $isHintActive }) => ($isHintActive ? 0.025 : 0.05)};
   transform: translateY(-1px);
+  animation: ${slowGearSpin} 18s linear infinite;
   pointer-events: none;
 `;
