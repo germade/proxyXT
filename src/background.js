@@ -1184,6 +1184,7 @@ async function handleActivateServer(payload) {
 async function handleUpdatePreferences(payload) {
   const state = await loadState();
   const wasSyncEnabled = Boolean(state.preferences?.syncServersWithAccount);
+  const previousAutoFailoverEnabled = Boolean(state.preferences?.autoFailoverEnabled);
   const incoming = payload?.preferences || {};
   const currentLanguage = String(state.preferences?.language || "auto").toLowerCase();
   const incomingLanguage = String(incoming.language || currentLanguage).toLowerCase();
@@ -1211,6 +1212,20 @@ async function handleUpdatePreferences(payload) {
         : Boolean(incoming.showFailoverNotifications),
     language
   };
+
+  const currentAutoFailoverEnabled = Boolean(state.preferences?.autoFailoverEnabled);
+  if (currentAutoFailoverEnabled !== previousAutoFailoverEnabled) {
+    await addLog(
+      "info",
+      currentAutoFailoverEnabled
+        ? "Failover automatico activado (deteccion via proxy.onProxyError, sin permisos adicionales)"
+        : "Failover automatico desactivado",
+      {
+        autoFailoverEnabled: currentAutoFailoverEnabled,
+        detectionSource: "proxy.onProxyError"
+      }
+    );
+  }
 
   await saveState(state);
   if (state.preferences.syncServersWithAccount) {
