@@ -24,3 +24,34 @@ body {
 #logsRoot {
   padding: 8px;
 }
+
+.logs-window-shell {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.logs-window-feedback {
+  min-height: 30px;
+  box-sizing: border-box;
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 0.78rem;
+  line-height: 1.2;
+  border: 1px solid transparent;
+  background: #eef4ff;
+  color: #264160;
+}
+
+.logs-window-feedback.is-success {
+  border-color: #b8cfee;
+  background: #edf5ff;
+  color: #264160;
+}
+
+.logs-window-feedback.is-error {
+  border-color: #e0b3b7;
+  background: #fff0f1;
+  color: #8a232a;
+}

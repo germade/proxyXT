@@ -108,7 +108,7 @@ function serializeLogForClipboard(log) {
   return `${time} [${normalizedLevel.toUpperCase()}] ${message}${contextBlock}`;
 }
 
-export function LogsView({ t, logs, onClose, onClearLogs, onFeedback }) {
+export function LogsView({ t, logs, onClose, onClearLogs, onFeedback, showOpenWindowButton = true }) {
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const [isConfirmClosing, setIsConfirmClosing] = useState(false);
   const [emptyStateShakeNonce, setEmptyStateShakeNonce] = useState(0);
@@ -409,14 +409,16 @@ export function LogsView({ t, logs, onClose, onClearLogs, onFeedback }) {
           >
             <BanSymbolSvg size={12} />
           </ClearLogsButton>
-          <OpenWindowButton
-            type="button"
-            onClick={handleOpenInNewWindow}
-            title={openInWindowLabel}
-            aria-label={openInWindowLabel}
-          >
-            <NewWindowSvg size={12} />
-          </OpenWindowButton>
+          {showOpenWindowButton ? (
+            <OpenWindowButton
+              type="button"
+              onClick={handleOpenInNewWindow}
+              title={openInWindowLabel}
+              aria-label={openInWindowLabel}
+            >
+              <NewWindowSvg size={12} />
+            </OpenWindowButton>
+          ) : null}
           <CloseWindowButton
             type="button"
             onClick={handleCloseWindow}
