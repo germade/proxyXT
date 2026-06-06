@@ -25,6 +25,8 @@ import {
   FilterMenuPanel,
   FilterTextButton,
   FilterToggleButton,
+  LogsToast,
+  LogsToastAnchor,
   LogContext,
   LogEntryContainer,
   LogMain,
@@ -111,10 +113,13 @@ function serializeLogForClipboard(log) {
 export function LogsView({ t, logs, onClose, onClearLogs, onFeedback, showOpenWindowButton = true }) {
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const [isConfirmClosing, setIsConfirmClosing] = useState(false);
+  const [toast, setToast] = useState(null);
   const [emptyStateShakeNonce, setEmptyStateShakeNonce] = useState(0);
   const [emptyClearClicks, setEmptyClearClicks] = useState(0);
   const [isSadEasterEggActive, setIsSadEasterEggActive] = useState(false);
     const closeConfirmTimerRef = useRef(null);
+  const toastHideTimerRef = useRef(null);
+  const toastCloseTimerRef = useRef(null);
   const sadEasterEggTimerRef = useRef(null);
   const confirmButtonRef = useRef(null);
   const filterMenuRef = useRef(null);
@@ -125,12 +130,46 @@ export function LogsView({ t, logs, onClose, onClearLogs, onFeedback, showOpenWi
           globalThis.clearTimeout(closeConfirmTimerRef.current);
           closeConfirmTimerRef.current = null;
         }
+        if (toastHideTimerRef.current) {
+          globalThis.clearTimeout(toastHideTimerRef.current);
+          toastHideTimerRef.current = null;
+        }
+        if (toastCloseTimerRef.current) {
+          globalThis.clearTimeout(toastCloseTimerRef.current);
+          toastCloseTimerRef.current = null;
+        }
         if (sadEasterEggTimerRef.current) {
           globalThis.clearTimeout(sadEasterEggTimerRef.current);
           sadEasterEggTimerRef.current = null;
         }
       };
     }, []);
+
+  function showLogsToast(message, isError = false, durationMs = 1400) {
+    if (toastHideTimerRef.current) {
+      globalThis.clearTimeout(toastHideTimerRef.current);
+      toastHideTimerRef.current = null;
+    }
+    if (toastCloseTimerRef.current) {
+      globalThis.clearTimeout(toastCloseTimerRef.current);
+      toastCloseTimerRef.current = null;
+    }
+
+    setToast({
+      message: String(message || ""),
+      isError: Boolean(isError),
+      isClosing: false
+    });
+
+    toastHideTimerRef.current = globalThis.setTimeout(() => {
+      setToast((current) => (current ? { ...current, isClosing: true } : current));
+      toastCloseTimerRef.current = globalThis.setTimeout(() => {
+        setToast(null);
+        toastCloseTimerRef.current = null;
+      }, 190);
+      toastHideTimerRef.current = null;
+    }, Math.max(250, Number.isFinite(durationMs) ? durationMs : 1400));
+  }
 
   useEffect(() => {
     if (!isConfirmOpen) {
@@ -275,7 +314,7 @@ export function LogsView({ t, logs, onClose, onClearLogs, onFeedback, showOpenWi
     try {
       if (globalThis.navigator?.clipboard?.writeText) {
         await globalThis.navigator.clipboard.writeText(text);
-        onFeedback?.(logsCopiedLabel, false);
+        showLogsToast(logsCopiedLabel, false);
         return;
       }
     } catch (_error) {
@@ -285,7 +324,7 @@ export function LogsView({ t, logs, onClose, onClearLogs, onFeedback, showOpenWi
     try {
       const textarea = globalThis.document?.createElement("textarea");
       if (!textarea) {
-        onFeedback?.(logsCopyFailedLabel, true);
+        showLogsToast(logsCopyFailedLabel, true, 1800);
         return;
       }
       textarea.value = text;
@@ -296,19 +335,23 @@ export function LogsView({ t, logs, onClose, onClearLogs, onFeedback, showOpenWi
       textarea.select();
       const copied = globalThis.document.execCommand("copy");
       globalThis.document.body.removeChild(textarea);
-      onFeedback?.(copied ? logsCopiedLabel : logsCopyFailedLabel, !copied);
+      if (copied) {
+        showLogsToast(logsCopiedLabel, false);
+      } else {
+        showLogsToast(logsCopyFailedLabel, true, 1800);
+      }
     } catch (_error) {
-      onFeedback?.(logsCopyFailedLabel, true);
+      showLogsToast(logsCopyFailedLabel, true, 1800);
     }
   }
 
   function handleOpenClearConfirm() {
     if (!orderedLogs.length) {
       if (isSadEasterEggActive) {
-        onFeedback?.(noLogsLabel, false, FEEDBACK_QUICK_DURATION_MS);
+        showLogsToast(noLogsLabel, false, FEEDBACK_QUICK_DURATION_MS);
         return;
       }
-      onFeedback?.(noLogsLabel, false, FEEDBACK_QUICK_DURATION_MS);
+      showLogsToast(noLogsLabel, false, FEEDBACK_QUICK_DURATION_MS);
       setEmptyStateShakeNonce((value) => value + 1);
       setEmptyClearClicks((value) => value + 1);
       return;
@@ -429,6 +472,13 @@ export function LogsView({ t, logs, onClose, onClearLogs, onFeedback, showOpenWi
           </CloseWindowButton>
         </ToolbarActions>
       </LogsToolbar>
+      {toast?.message ? (
+        <LogsToastAnchor>
+          <LogsToast $isError={toast.isError} $isClosing={toast.isClosing}>
+            {toast.message}
+          </LogsToast>
+        </LogsToastAnchor>
+      ) : null}
       <LogsContent>
         {orderedLogs.length
           ? orderedLogs.map((log, index) => <LogEntry key={`${log.time || index}-${index}`} log={log} t={t} />)

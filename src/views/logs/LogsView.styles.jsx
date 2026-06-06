@@ -67,7 +67,30 @@ const sadFaceFadeOut = keyframes`
   }
 `;
 
+const logsToastFadeInDown = keyframes`
+  from {
+    opacity: 0;
+    transform: translate(-50%, -6px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+`;
+
+const logsToastFadeOutDown = keyframes`
+  from {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
+`;
+
 export const LogsPanel = styled.section`
+  position: relative;
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -95,6 +118,37 @@ export const ToolbarActions = styled.div`
   display: flex;
   align-items: center;
   gap: 6px;
+`;
+
+export const LogsToastAnchor = styled.div`
+  position: relative;
+  height: 0;
+  z-index: 5;
+`;
+
+export const LogsToast = styled.div`
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translate(-50%, 0);
+  min-width: 170px;
+  max-width: calc(100% - 24px);
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  line-height: 1.2;
+  border: 1px solid ${({ $isError }) => ($isError ? "#e0b3b7" : "#4f8de4")};
+  background: ${({ $isError }) => ($isError
+    ? "#fff0f1"
+    : "linear-gradient(135deg, #2f75e3 0%, #1d5fc8 100%)")};
+  color: ${({ $isError }) => ($isError ? "#8a232a" : "#f6fbff")};
+  box-shadow: ${({ $isError }) => ($isError
+    ? "0 10px 20px rgba(117, 41, 47, 0.18)"
+    : "0 12px 26px rgba(18, 78, 168, 0.35)")};
+  pointer-events: none;
+  text-align: center;
+  animation: ${({ $isClosing }) => ($isClosing ? logsToastFadeOutDown : logsToastFadeInDown)} 180ms ease forwards;
 `;
 
 export const FilterMenu = styled.details`
