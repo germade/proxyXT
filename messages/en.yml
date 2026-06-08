@@ -111,3 +111,13 @@ preferences:
   reloadHelp: Reloads the current tab each time the active proxy is enabled or disabled.
   syncHelp: Stores your saved servers in your browser account to keep them available on your other signed-in browsers.
   failoverNotificationsHelp: Enables extension alerts for important events such as automatic server changes.
+
+background:
+  notifications:
+    failoverEnabled: Notifications enabled. This is a test notification.
+    failoverSwitch: "Automatic server switch: {{from}} -> {{to}}"
+    tabsPermissionEnabled: Tabs permission granted. Auto reload is now ready.
+  logs:
+    notificationsPermissionGrantedPending: Notifications permission granted. Completing pending activation.
+    tabsPermissionGrantedNotify: Tabs permission granted. Sending confirmation notification.
+    permissionsPendingFlowFailed: Could not complete pending permissions flow

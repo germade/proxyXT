@@ -1,3 +1,5 @@
+import { createTranslator, resolveLanguage } from "./lib/i18n.js";
+
 const api = globalThis.browser ?? globalThis.chrome;
 
 const STORAGE_KEY = "proxyxt-state";
@@ -27,39 +29,6 @@ const INACTIVE_ICON_PATHS = {
   128: "icons/proxyxt-128-bw.png"
 };
 const ICON_SIZES = [16, 32, 48, 128];
-const SUPPORTED_LANGUAGES = ["en", "es", "fr", "pt", "it", "de"];
-const NOTIFICATION_MESSAGES = {
-  en: {
-    failoverEnabled: "Notifications enabled. This is a test notification.",
-    failoverSwitch: "Automatic server switch: {from} -> {to}",
-    tabsPermissionEnabled: "Tabs permission granted. Auto reload is now ready."
-  },
-  es: {
-    failoverEnabled: "Notificaciones activadas. Esta es una notificacion de prueba.",
-    failoverSwitch: "Cambio automatico de servidor: {from} -> {to}",
-    tabsPermissionEnabled: "Permiso de pestanas concedido. La recarga automatica ya esta lista."
-  },
-  fr: {
-    failoverEnabled: "Notifications activees. Ceci est une notification de test.",
-    failoverSwitch: "Changement automatique de serveur: {from} -> {to}",
-    tabsPermissionEnabled: "Autorisation des onglets accordee. Le rechargement automatique est pret."
-  },
-  pt: {
-    failoverEnabled: "Notificacoes ativadas. Esta e uma notificacao de teste.",
-    failoverSwitch: "Mudanca automatica de servidor: {from} -> {to}",
-    tabsPermissionEnabled: "Permissao de abas concedida. A recarga automatica ja esta pronta."
-  },
-  it: {
-    failoverEnabled: "Notifiche attivate. Questa e una notifica di prova.",
-    failoverSwitch: "Cambio automatico server: {from} -> {to}",
-    tabsPermissionEnabled: "Permesso schede concesso. La ricarica automatica e pronta."
-  },
-  de: {
-    failoverEnabled: "Benachrichtigungen aktiviert. Dies ist eine Testbenachrichtigung.",
-    failoverSwitch: "Automatischer Serverwechsel: {from} -> {to}",
-    tabsPermissionEnabled: "Tab-Berechtigung erteilt. Das automatische Neuladen ist bereit."
-  }
-};
 
 const logoBitmapCache = new Map();
 const dynamicIconCache = new Map();
@@ -384,23 +353,23 @@ function sanitizeColorHex(color) {
   return /^#([0-9A-F]{3}|[0-9A-F]{6})$/.test(normalized) ? normalized : null;
 }
 
-function resolveNotificationLanguage(state) {
-  const preferred = String(state?.preferences?.language || "auto").toLowerCase();
-  if (SUPPORTED_LANGUAGES.includes(preferred)) {
-    return preferred;
-  }
-
-  const uiLanguage = String(api.i18n?.getUILanguage?.() || "en").toLowerCase();
-  const baseLanguage = uiLanguage.split(/[-_]/)[0];
-  return SUPPORTED_LANGUAGES.includes(baseLanguage) ? baseLanguage : "en";
+function getBackgroundTranslator(state) {
+  const preference = state?.preferences?.language || "auto";
+  const uiLanguage = api.i18n?.getUILanguage?.() || "en";
+  const language = resolveLanguage(preference, uiLanguage);
+  return createTranslator(language);
 }
 
 function getNotificationMessage(state, key, replacements = {}) {
-  const language = resolveNotificationLanguage(state);
-  const template = NOTIFICATION_MESSAGES[language]?.[key] || NOTIFICATION_MESSAGES.en[key] || "";
-  return template.replace(/\{(\w+)\}/g, (_match, token) => {
-    return replacements[token] == null ? "" : String(replacements[token]);
-  });
+  const t = getBackgroundTranslator(state);
+  return t(`background.notifications.${key}`, replacements);
+}
+
+function getLogMessage(state, key, { fallback = key, replacements = {} } = {}) {
+  const t = getBackgroundTranslator(state);
+  const path = `background.logs.${key}`;
+  const message = t(path, replacements);
+  return message === path ? (fallback || "") : message;
 }
 
 function getContrastingTextColor(hexColor) {
@@ -1564,10 +1533,15 @@ if (api.permissions?.onAdded?.addListener) {
     const permissions = Array.isArray(details?.permissions) ? details.permissions : [];
 
     (async () => {
+      const stateForLogs = await loadState();
+
       if (permissions.includes("notifications")) {
         const notificationsPending = await getNotificationsEnablePending();
         if (notificationsPending) {
-          await addLog("debug", "Permiso de notificaciones concedido: completando activacion pendiente", {
+          await addLog("debug", getLogMessage(
+            stateForLogs,
+            "notificationsPermissionGrantedPending",
+          ), {
             permissions
           });
           await handleEnableFailoverNotifications();
@@ -1576,21 +1550,32 @@ if (api.permissions?.onAdded?.addListener) {
         }
       }
 
-      if (permissions.includes("activeTab")) {
+      if (permissions.includes("tabs")) {
         const tabsNotifyPending = await getTabsPermissionNotifyPending();
         if (!tabsNotifyPending) {
           return;
         }
 
-        await addLog("debug", "Permiso activeTab concedido: enviando notificacion de confirmacion", {
+        await addLog("debug", getLogMessage(
+          stateForLogs,
+          "tabsPermissionGrantedNotify",
+        ), {
           permissions
         });
         await handleNotifyTabsPermissionEnabled();
       }
     })().catch((error) => {
-      addLog("warn", "No se pudo completar el flujo pendiente de permisos", {
+      loadState()
+        .then((stateForLogs) => addLog("warn", getLogMessage(
+          stateForLogs,
+          "permissionsPendingFlowFailed",
+        ), {
+          error: error instanceof Error ? error.message : String(error)
+        }))
+        .catch(() => addLog("warn", "No se pudo completar el flujo pendiente de permisos", {
         error: error instanceof Error ? error.message : String(error)
-      }).catch(() => {
+        }))
+        .catch(() => {
         // Ignore logging failures in permissions listener.
       });
     });
